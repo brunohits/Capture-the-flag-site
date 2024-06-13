@@ -1,0 +1,71 @@
+<div class = "container align-items-center juctify-items-center  mt-5 w-75">
+    <div class = "border p-4 mb-2">
+        <div class = "h2 mb-3">Задачи</div>
+        <label for = "name">Название</label>
+        <div class = "input-group mb-3">
+            <input class = "form-control" id = "name">
+            <div class="invalid-feedback"></div>
+        </div>
+        <div class="row mb-2">
+            <div class="col">
+                <label for = "sortSelect">Сортировка</label>
+                <select class="form-select" id = "sortSelect">
+                    <option value="1">Имя убывание</option>
+                    <option value="2">Имя возрастание</option>
+                    <option value="3">Сложность убывание</option>
+                    <option value="4">Сложность возрастание</option>
+                </select>
+            </div>
+            <div class="col">
+                <label for = "filterSelect">Фильтрация</label>
+                <select class="form-select" id = "filterSelect">
+                    <option value="1">Любые</option>
+                </select>
+            </div>
+        </div>
+        <button class = "btn btn-primary" id = "find">Поиск</button>
+    </div>
+
+    <div class = "container w-100" id = "examples">
+        <div class="accordion" id="accordion1">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading1">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="true" aria-controls="collapse1">
+                        <div class="col text-center">Название</div>
+                        <div class="col text-center">Тип</div>
+                        <div class="col text-center">Сложность</div>
+                    </button>
+                </h2>
+                <div id="collapse1" class="accordion-collapse collapse" aria-labelledby="heading1" data-bs-parent="#accordion1">
+                    <div class="accordion-body">
+                        <div class = "h5">Описание</div>
+                        <div class="accordion" id="accordion1Answer">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading1Answer">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1Answer" aria-expanded="true" aria-controls="collapse1Answer">
+                                        Показать флаг?
+                                    </button>
+                                </h2>
+                                <div id="collapse1Answer" class="accordion-collapse collapse" aria-labelledby="heading1Answer" data-bs-parent="#accordion1Answer">
+                                    <div class="accordion-body">
+                                        Ответ
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            <li class="page-item"><a class="page-link" href="#" aria-label="prev"><span aria-hidden="true">&laquo;</span></a></li>
+            <li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>
+            <li class="page-item"><a class="page-link" href="#" data-page="2">2</a></li>
+            <li class="page-item"><a class="page-link" href="#" data-page="3">3</a></li>
+            <li class="page-item"><a class="page-link" href="#" aria-label="next"><span aria-hidden="true">&raquo;</span></a></li>
+        </ul>
+    </nav>
+</div>
