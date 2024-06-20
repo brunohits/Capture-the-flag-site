@@ -12,8 +12,7 @@ class UserCreate(UserBase):
     password: str
 
 
-class UserLogin(UserBase):
-    password: str
+UserLogin = UserCreate
 
 
 class ShortUser(UserBase):
@@ -27,10 +26,20 @@ class User(UserBase):
     id: int
     username: str
     create_time: date
+    disabled: bool
 
     class Config:
         from_attributes = True
 
 
+class UserInDB(User):
+    password: str
+
+
 class Token(BaseModel):
     access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    username: str | None = None
