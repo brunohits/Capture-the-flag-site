@@ -1,44 +1,32 @@
-<div class = "container align-items-center juctify-items-center  mt-5 w-75">
-    <div class = "border p-4 mb-2">
-        <div class = "h2 mb-3">Рейтинг</div>
+<div class="container align-items-center justify-items-center mt-5 w-75">
+    <div class="border p-4 mb-2">
+        <div class="h2 mb-3">Рейтинг</div>
         <div class="row mb-2">
             <div class="col">
-                <label for = "name">Имя</label>
-                <div class = "input-group mb-3">
-                <input class = "form-control" id = "name">
-                <div class="invalid-feedback"></div>
-        </div>
+                <label for="name">Имя</label>
+                <div class="input-group mb-3">
+                    <input class="form-control" id="name">
+                    <div class="invalid-feedback"></div>
+                </div>
             </div>
             <div class="col">
-                <label for = "sortSelect">Сортировка</label>
-                <select class="form-select" id = "sortSelect">
-                    <option value="1">Имя убывание</option>
-                    <option value="2">Имя возрастание</option>
-                    <option value="3">Рейтинг убывание</option>
-                    <option value="4">Рейтинг возрастание</option>
+                <label for="sortSelect">Сортировка</label>
+                <select class="form-select" id="sortSelect">
+                    <option value="name_desc">Имя убывание</option>
+                    <option value="name_asc">Имя возрастание</option>
+                    <option value="rating_desc">Рейтинг убывание</option>
+                    <option value="rating_asc">Рейтинг возрастание</option>
                 </select>
             </div>
         </div>
-        <button class = "btn btn-primary" id = "find">Поиск</button>
+        <button class="btn btn-primary" id="find">Поиск</button>
     </div>
 
-    <div class = "container w-100" id = "examples">
-        <div class = "border row p-2 align-items-center mb-1">
-            <div class="col">Имя</div>
-            <div class="col">Дата регистрации</div>
-            <div class="col">Процент побед</div>
-            <div class="col">Средние баллы</div>
-            <div class="col">Дата регистрации</div>
-        </div>
-    </div>
+    <div class="container w-100" id="rating"></div>
 
     <nav aria-label="Page navigation example">
-        <ul class="pagination justify-content-center">
-            <li class="page-item"><a class="page-link" href="#" aria-label="prev"><span aria-hidden="true">&laquo;</span></a></li>
-            <li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>
-            <li class="page-item"><a class="page-link" href="#" data-page="2">2</a></li>
-            <li class="page-item"><a class="page-link" href="#" data-page="3">3</a></li>
-            <li class="page-item"><a class="page-link" href="#" aria-label="next"><span aria-hidden="true">&raquo;</span></a></li>
-        </ul>
+        <ul class="pagination justify-content-center"></ul>
     </nav>
 </div>
+
+<script src="../scripts/raiting.js" defer></script>

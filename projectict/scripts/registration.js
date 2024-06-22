@@ -1,107 +1,73 @@
-function genderTransform(gender){
-    switch (gender) {
-        case "Мужской":
-            return "Male";    
-        default:
-            return "Female";
+const email_pattern = RegExp("[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-zA-Z]{2,4}");
+const password_pattern = RegExp("[a-zA-Z0-9]{6,}");
+
+document.querySelector("#registrationClick").addEventListener("click", () => {
+    const nick = document.querySelector("#nick");
+    const email = document.querySelector("#email");
+    const password = document.querySelector("#password");
+    const passwordAgain = document.querySelector("#passwordAgain");
+    
+    [nick, email, password, passwordAgain].forEach(input => {
+        input.classList.remove("is-invalid");
+    });
+
+    let isValid = true;
+
+    if (nick.value.trim() === '') {
+        nick.classList.add("is-invalid");
+        isValid = false;
     }
-}
 
-function return_null(obj){
-    if(obj){ return obj; }
-    return null;
-}
-
-function returndef(id){
-    document.querySelector(`#${id}`).classList.remove("is-invalid");
-    document.querySelector(`#${id}`).parentElement.querySelector(".invalid-feedback").textContent = "";
-}
-
-function correctTime(date){
-    return `${date}T00:00:00.000Z`;
-}
-
-document.querySelector("#regClick").addEventListener("click",()=>{
-    returndef("Name");
-    returndef("passwordField");
-    returndef("emailField");
-    returndef("Speciality");
-    const name  = return_null(document.querySelector("#Name").value);
-    const password = return_null(document.querySelector("#passwordField").value);
-    const email =  return_null(document.querySelector("#emailField").value);
-    const phone  = return_null(document.querySelector("#phoneField").value);
-    const id = return_null(document.querySelector("#Speciality").getAttribute("sid"));
-    const date = return_null(document.querySelector("#Date").value);
-    const email_pattern = RegExp("[a-zA-Z0-9]+\@[a-zA-Z0-9]+\.[a-zA-Z]{2,4}");
-    const password_pattern = RegExp("[a-zA-z0-9]{6,}");
-    if(email_pattern.test(email) && password_pattern.test(password)&& id && name != ""){
-        let data={};
-        data.name = name;
-        data.password = password;
-        data.email = email;
-        data.speciality = id;
-        data.gender = genderTransform(document.querySelector("#Gender").value);
-        if(phone){
-            data.phone = phone;
-        }
-        if(date){
-            data.birthday = date;
-        }
-        console.log(data);
-        $.ajax({
-            method:"POST",
-            url: `https://mis-api.kreosoft.space/api/doctor/register`,
-            contentType:"application/json",
-            dataType:"json",
-            data:JSON.stringify(data),
-            success: function(data){
-                localStorage.setItem("token", data.token);
-            },
-            error: function(t){
-                alert(t)
-            }
-        });
+    if (!email_pattern.test(email.value.trim())) {
+        email.classList.add("is-invalid");
+        email.parentElement.querySelector(".invalid-feedback").textContent = "Введите корректный email";
+        isValid = false;
     }
-    else{
-        if(RegExp("[a-zA-Z]{1,1000}").test(name)){
-            document.querySelector("#Name").classList.add("is-invalid");
-            document.querySelector("#Name").parentElement.querySelector(".invalid-feedback").textContent = "Имя является обязательным пунктом";
-        }
-        if(!password_pattern.test(password)){
-            document.querySelector("#passwordField").classList.add("is-invalid");
-            document.querySelector("#passwordField").parentElement.querySelector(".invalid-feedback").textContent = "Пароль не соответствует требованиям(должен быть от 6 символов)";
-        }
-        if(!email_pattern.test(email)){
-            document.querySelector("#emailField").classList.add("is-invalid");
-            document.querySelector("#emailField").parentElement.querySelector(".invalid-feedback").textContent = "Email не соответствует требованиям";
-        }
-        if(!id){
-            document.querySelector("#Speciality").classList.add("is-invalid");
-            document.querySelector("#Speciality").parentElement.querySelector(".invalid-feedback").textContent = "Поле 'Специальность' должно быть одним из предложенных";
-        }
-    }
-});
 
-document.querySelector("#Speciality").addEventListener("input", (e)=>{
-    document.querySelector("datalist").innerHTML = "";
+    if (!password_pattern.test(password.value.trim())) {
+        password.classList.add("is-invalid");
+        password.parentElement.querySelector(".invalid-feedback").textContent = "Пароль должен быть не менее 6 символов";
+        isValid = false;
+    }
+
+    if (passwordAgain.value.trim() !== password.value.trim()) {
+        passwordAgain.classList.add("is-invalid");
+        passwordAgain.parentElement.querySelector(".invalid-feedback").textContent = "Пароли должны совпадать";
+        isValid = false;
+    }
+
+    if (!isValid) return;
+
+    const registrationData = {
+        nick: nick.value.trim(),
+        email: email.value.trim(),
+        password: password.value.trim()
+    };
+
     $.ajax({
-        method:"GET",
-        url: `https://mis-api.kreosoft.space/api/dictionary/speciality?name=${e.target.value}`,
-        contentType:"application/json",
-        success: function(data){
-            putintodatalist(data)
+        method: "POST",
+        url: "",
+        contentType: "application/json",
+        dataType: "json",
+        data: JSON.stringify(registrationData),
+        success: function(data) {
+            localStorage.setItem("token", data.token);
+            window.location.href = '/';
         },
-        error: function(t){
-            console.log(t);
+        error: function(error) {
+            const errors = error.responseJSON.errors;
+            if (!error.responseJSON.message) {
+                if (errors.Email) {
+                    email.classList.add("is-invalid");
+                    email.parentElement.querySelector(".invalid-feedback").textContent = errors.Email[0];
+                }
+                if (errors.Password) {
+                    password.classList.add("is-invalid");
+                    password.parentElement.querySelector(".invalid-feedback").textContent = errors.Password[0];
+                }
+            } else {
+                alert("Аккаунта нет в системе");
+            }
         }
     });
 });
-
-function putintodatalist(data){
-    let datalist = document.querySelector("datalist");
-    data.specialties.forEach(spec => {
-        console.log(spec);
-        datalist.innerHTML +=`<option>${spec.name}</option>`;
-        document.querySelector("#Speciality").setAttribute("sid", spec.id);
-    });
-}

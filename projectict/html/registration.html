@@ -1,24 +1,29 @@
-<div class = "container align-items-center juctify-items-center  mt-5 w-50">
-    <form class = "border p-4">
-        <div class = "h2 mb-3">
+<div class="container align-items-center justify-items-center mt-5 w-50">
+    <form class="border p-4" id="registrationForm">
+        <div class="h2 mb-3">
             Регистрация
         </div>
-        <label for = "nick">Ник</label>
-        <div class = "input-group mb-3">
-            <input class = "form-control" id = "nick">
-            <div class="invalid-feedback"></div>
+        <label for="nick">Ник</label>
+        <div class="input-group mb-3">
+            <input class="form-control" id="nick">
+            <div class="invalid-feedback">Поле должно быть заполнено</div>
         </div>
-        <label for = "email">Email</label>
-        <div class = "input-group mb-3">
-            <input class = "form-control" type="email" id = "email">
-            <div class="invalid-feedback"></div>
+        <label for="email">Email</label>
+        <div class="input-group mb-3">
+            <input class="form-control" type="email" id="email">
+            <div class="invalid-feedback">Введите корректный email</div>
         </div>
-        <label for ="password" class = "mt-2">Пароль</label>
-        <div class = "input-group mb-3">
-            <input class = "form-control" type="password" id ="password">
-            <div class="invalid-feedback"></div>
+        <label for="password" class="mt-2">Пароль</label>
+        <div class="input-group mb-3">
+            <input class="form-control" type="password" id="password">
+            <div class="invalid-feedback">Пароль должен быть не менее 6 символов</div>
         </div>
-        <button class = "btn btn-primary w-100 mt-2" id = "registration" type  ="button">Зарегистрироваться</button>
+        <label for="passwordAgain" class="mt-2">Повторите пароль</label>
+        <div class="input-group mb-3">
+            <input class="form-control" type="password" id="passwordAgain">
+            <div class="invalid-feedback">Пароли должны совпадать</div>
+        </div>
+        <button class="btn btn-primary w-100 mt-2" id="registrationClick" type="button">Зарегистрироваться</button>
     </form>
 </div>
-<script src = "../scripts/registration.js"></script>
+<script src="../scripts/registration.js"></script>
