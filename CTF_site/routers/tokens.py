@@ -13,9 +13,5 @@ router = APIRouter()
 
 
 @router.post("/token", response_model=Token, status_code=201)
-def login(
-    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
-):
-    print(form_data)
-    print(db)
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     return login_for_access_token(db, form_data)

@@ -2,12 +2,13 @@ from typing import Union
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 
-import models.user
+import models.alchemy_models
 from database import engine
 from routers.users import router as user_router
 from routers.tokens import router as token_router
+from routers.tasks import router as tasks_router
 
-models.user.Base.metadata.create_all(bind=engine)
+models.alchemy_models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
@@ -33,4 +34,9 @@ app.include_router(
 app.include_router(
     router=token_router,
     prefix="/login"
+)
+
+app.include_router(
+    router=tasks_router,
+    prefix="/tasks"
 )

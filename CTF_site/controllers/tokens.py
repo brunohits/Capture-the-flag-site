@@ -12,9 +12,7 @@ from starlette import status
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_401_UNAUTHORIZED
 
 from database import get_db
-from models.schemes import UserLogin as UserLoginScheme, TokenData
-from models.schemes import User as UserScheme
-from models.user import User, Token
+from models.alchemy_models import User, Token
 from secure import pwd_context, SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, oauth2_scheme
 
 
@@ -50,14 +48,18 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Se
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
+            print("Token payload missing username.")
             raise credentials_exception
-        token_data = TokenData(username=username)
-    except JWTError:
+        print(f"Username from token: {username}")
+    except JWTError as e:
+        print(f"Token decoding failed: {e}")
         raise credentials_exception
 
-    user = db.query(User).filter(User.username == token_data.username).first()
+    user = db.query(User).filter(User.username == username).first()
     if user is None:
+        print("User not found in the database.")
         raise credentials_exception
+    print("User authenticated successfully.")
     return user
 
 
@@ -81,15 +83,15 @@ def login_for_access_token(db: Session, form_data: OAuth2PasswordRequestForm):
         data={"sub": user.username}, expires_delta=access_token_expires
     )
     print(f"Generated access token: {access_token}")
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token}
 
 
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.now() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
