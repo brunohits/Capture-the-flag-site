@@ -1,0 +1,80 @@
+<div class="container mt-5">
+    <h2>Создание соревнования</h2>
+    <form id="create-competition-form">
+        <div class="mb-3">
+            <label for="competitionName" class="form-label">Название соревнования</label>
+            <input type="text" class="form-control" id="competitionName" required>
+        </div>
+        <div class="mb-3">
+            <label for="competitionDescription" class="form-label">Описание соревнования</label>
+            <textarea class="form-control" id="competitionDescription" rows="3" required></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="startDate" class="form-label">Дата начала</label>
+            <input type="datetime-local" class="form-control" id="startDate" required>
+        </div>
+        <div class="mb-3">
+            <label for="durationHours" class="form-label">Длительность (Часы)</label>
+            <input type="number" class="form-control" id="durationHours" required>
+        </div>
+        <div class="mb-3">
+            <label for="durationMinutes" class="form-label">Длительность (Минуты)</label>
+            <input type="number" class="form-control" id="durationMinutes" required>
+        </div>
+        <div class="mb-3">
+            <label for="maxTeams" class="form-label">Максимальное количество команд</label>
+            <input type="number" class="form-control" id="maxTeams" required>
+        </div>
+        <div class="mb-3">
+            <label for="teamSize" class="form-label">Размер команды</label>
+            <input type="number" class="form-control" id="teamSize" required>
+        </div>
+        <div class="mb-3">
+            <label for="teamName" class="form-label">Название команды</label>
+            <input type="text" class="form-control" id="teamName" required>
+        </div>
+        <div class="mb-3">
+            <label for="isPrivate" class="form-label">Закрытое соревнование</label>
+            <select class="form-select" id="isPrivate" required>
+                <option value="false">Нет</option>
+                <option value="true">Да</option>
+            </select>
+        </div>
+        <div class="mb-3 d-none" id="competitionCodeContainer">
+            <label for="competitionCode" class="form-label">Код доступа</label>
+            <input type="text" class="form-control" id="competitionCode">
+        </div>
+        <div class="mb-3">
+            <label for="taskNameSearch" class="form-label">Имя задачи</label>
+            <input type="text" class="form-control" id="taskNameSearch" placeholder="Введите имя задачи">
+        </div>
+        <div class="mb-3">
+            <label for="taskTypeSearch" class="form-label">Тип задачи</label>
+            <select class="form-select" id="taskTypeSearch">
+                <option value="">Любой</option>
+                <option value="Type1">Тип 1</option>
+                <option value="Type2">Тип 2</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="taskDifficultySearch" class="form-label">Сложность задачи</label>
+            <select class="form-select" id="taskDifficultySearch">
+                <option value="">Любая</option>
+                <option value="Easy">Легкая</option>
+                <option value="Medium">Средняя</option>
+                <option value="Hard">Тяжелая</option>
+            </select>
+        </div>
+        <button type="button" class="btn btn-primary mt-2" id="searchTasks">Поиск задач</button>
+        <div class="mb-3 mt-3">
+            <label class="form-label">Доступные задачи</label>
+            <ul class="list-group" id="taskList"></ul>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Выбранные задачи</label>
+            <ul class="list-group" id="selectedTaskList"></ul>
+        </div>
+        <button type="submit" class="btn btn-primary">Создать соревнование</button>
+    </form>
+</div>
+<script src="scripts/createCompetition.js"></script>

@@ -9,9 +9,11 @@ $(document).ready(function() {
     const nick_pattern = RegExp(".+");
 
     function fetchProfileData() {
+        // Закомментируем реальный AJAX-запрос для тестирования
+        /*
         $.ajax({
             method: "GET",
-            url: "https://фывлоаптЫВЛОДЖПФЖДЫВпрДЫВПРжывп",
+            url: "https://example.com/api/profile",
             headers: {
                 "Authorization": `Bearer ${token}`
             },
@@ -25,6 +27,44 @@ $(document).ready(function() {
                 alert('Ошибка получения данных профиля: ' + error.responseText);
             }
         });
+        */
+
+        // Тестовые данные для проверки
+        const testData = {
+            nick: "testuser",
+            email: "testuser@example.com",
+            history: {
+                competition: [
+                    {
+                        date: "2023-01-01",
+                        name: "Соревнование 1",
+                        type: "Тип 1",
+                        duration: "2 часа",
+                        points: "100",
+                        place: "1",
+                        id: "1"
+                    },
+                    {
+                        date: "2023-02-01",
+                        name: "Соревнование 2",
+                        type: "Тип 2",
+                        duration: "3 часа",
+                        points: "80",
+                        place: "2",
+                        id: "2"
+                    }
+                ],
+                pagination: {
+                    count: 1
+                }
+            }
+        };
+
+        // Отображение тестовых данных
+        $('#nick').val(testData.nick);
+        $('#email').val(testData.email);
+        renderHistory(testData.history);
+        renderPagination(testData.history.pagination);
     }
 
     function renderHistory(history) {
@@ -63,9 +103,11 @@ $(document).ready(function() {
     }
 
     function fetchHistoryPage(page) {
+        // Закомментируем реальный AJAX-запрос для тестирования
+        /*
         $.ajax({
             method: "GET",
-            url: `https://asdadasdadдщшолырвп.дылрод.дп?page=${page}`,
+            url: `https://example.com/api/history?page=${page}`,
             headers: {
                 "Authorization": `Bearer ${token}`
             },
@@ -77,6 +119,35 @@ $(document).ready(function() {
                 alert('Ошибка получения данных истории: ' + error.responseText);
             }
         });
+        */
+        // Тестовые данные для проверки
+        const testHistoryData = {
+            competition: [
+                {
+                    date: "2023-01-01",
+                    name: "Соревнование 1",
+                    type: "Тип 1",
+                    duration: "2 часа",
+                    points: "100",
+                    place: "1",
+                    id: "1"
+                },
+                {
+                    date: "2023-02-01",
+                    name: "Соревнование 2",
+                    type: "Тип 2",
+                    duration: "3 часа",
+                    points: "80",
+                    place: "2",
+                    id: "2"
+                }
+            ],
+            pagination: {
+                count: 1
+            }
+        };
+        renderHistory(testHistoryData);
+        renderPagination(testHistoryData.pagination);
     }
 
     $('#save').on('click', function() {
@@ -103,9 +174,11 @@ $(document).ready(function() {
 
         const profileData = { nick, email };
 
+        // Закомментируем реальный AJAX-запрос для тестирования
+        /*
         $.ajax({
             method: "PUT",
-            url: "https://lasjdgh;ljaghlogas",
+            url: "https://example.com/api/profile",
             headers: {
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json"
@@ -118,6 +191,9 @@ $(document).ready(function() {
                 alert('Ошибка обновления профиля: ' + error.responseText);
             }
         });
+        */
+        // Тестовое сообщение для проверки
+        alert('Профиль успешно обновлен');
     });
 
     $('#history').on('click', '.btn-primary', function() {

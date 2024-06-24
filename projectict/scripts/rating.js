@@ -6,20 +6,37 @@ $(document).ready(function() {
     }
 
     function fetchRating(page = 1, sort = 'name_desc', name = '') {
-        $.ajax({
-            method: "GET",
-            url: `https://mis-api.kreosoft.space/api/raiting?page=${page}&sort=${sort}&name=${name}`,
-            headers: {
-                "Authorization": `Bearer ${token}`
-            },
-            success: function(data) {
-                renderRating(data.users);
-                renderPagination(data.pagination);
-            },
-            error: function(error) {
-                alert('Ошибка получения данных рейтинга: ' + error.responseText);
+        // Тестовые данные
+        const testData = {
+            users: [
+                {
+                    name: "John Doe",
+                    registrationDate: "2022-01-15T00:00:00Z",
+                    winRate: 75,
+                    averageScore: 85
+                },
+                {
+                    name: "Jane Smith",
+                    registrationDate: "2021-05-20T00:00:00Z",
+                    winRate: 60,
+                    averageScore: 78
+                },
+                {
+                    name: "Mike Johnson",
+                    registrationDate: "2023-02-10T00:00:00Z",
+                    winRate: 82,
+                    averageScore: 90
+                }
+            ],
+            pagination: {
+                total_pages: 1,
+                current_page: 1
             }
-        });
+        };
+
+        // Используем тестовые данные для отрисовки
+        renderRating(testData.users);
+        renderPagination(testData.pagination);
     }
 
     function renderRating(users) {

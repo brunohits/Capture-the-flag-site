@@ -7,6 +7,8 @@ $(document).ready(function() {
 
     function fetchExamples(page = 1, sort = 'name_desc', filter = 'all') {
         const name = $('#name').val();
+        // Реальный AJAX-запрос закомментирован
+        /*
         $.ajax({
             method: "GET",
             url: `https://mis-api.kreosoft.space/api/examples?page=${page}&sort=${sort}&filter=${filter}&name=${name}`,
@@ -22,6 +24,44 @@ $(document).ready(function() {
                 alert('Ошибка получения данных примеров: ' + error.responseText);
             }
         });
+        */
+
+        // Тестовые данные
+        const testExamples = [
+            {
+                id: 1,
+                name: "Пример 1",
+                type: "Тип 1",
+                difficulty: "Легкая",
+                description: "Описание примера 1",
+                image: null,
+                file: null,
+                link: null,
+                text: "Текст примера 1",
+                comments: [
+                    { name: "Пользователь 1", date: "2023-06-24", text: "Комментарий 1" },
+                    { name: "Пользователь 2", date: "2023-06-25", text: "Комментарий 2" }
+                ]
+            },
+            {
+                id: 2,
+                name: "Пример 2",
+                type: "Тип 2",
+                difficulty: "Средняя",
+                description: "Описание примера 2",
+                image: "https://via.placeholder.com/150",
+                file: null,
+                link: null,
+                text: null,
+                comments: []
+            }
+        ];
+        const testPagination = { current_page: 1, total_pages: 1 };
+        const testTypes = ["Тип 1", "Тип 2", "Тип 3"];
+
+        renderExamples(testExamples);
+        renderPagination(testPagination);
+        populateFilterOptions(testTypes);
     }
 
     function renderExamples(examples) {
@@ -49,6 +89,11 @@ $(document).ready(function() {
                             <div id="flag-result${index}"></div>
                             <div class="h5 mt-3">Комментарии</div>
                             ${renderComments(example.comments)}
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" id="comment${index}" placeholder="Введите комментарий">
+                                <button class="btn btn-primary" onclick="addComment('${example.id}', '#comment${index}', ${index})">Добавить комментарий</button>
+                            </div>
+                            <div id="comment-result${index}"></div>
                         </div>
                     </div>
                 </div>
@@ -127,6 +172,8 @@ $(document).ready(function() {
 
     window.checkFlag = function(exampleId, flagInputSelector) {
         const flag = $(flagInputSelector).val();
+        // Реальный AJAX-запрос закомментирован
+        /*
         $.ajax({
             method: "POST",
             url: `https://mis-api.kreosoft.space/api/examples/${exampleId}/checkFlag`,
@@ -147,6 +194,44 @@ $(document).ready(function() {
                 alert('Ошибка проверки флага: ' + error.responseText);
             }
         });
+        */
+
+        // Тестовый ответ
+        const correctFlag = "testFlag";
+        $(flagInputSelector).next('.invalid-feedback').remove();
+        if (flag === correctFlag) {
+            $(flagInputSelector).after('<div class="valid-feedback d-block">Правильно!</div>');
+        } else {
+            $(flagInputSelector).after('<div class="invalid-feedback d-block">Неправильно!</div>');
+        }
+    };
+
+    window.addComment = function(exampleId, commentInputSelector, index) {
+        const text = $(commentInputSelector).val();
+        // Реальный AJAX-запрос закомментирован
+        /*
+        $.ajax({
+            method: "POST",
+            url: `https://mis-api.kreosoft.space/api/examples/${exampleId}/comments`,
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            data: JSON.stringify({ text }),
+            success: function(response) {
+                $(commentInputSelector).val('');
+                $('#comment-result' + index).html('<div class="valid-feedback d-block">Комментарий добавлен!</div>');
+                fetchExamples();
+            },
+            error: function(error) {
+                alert('Ошибка добавления комментария: ' + error.responseText);
+            }
+        });
+        */
+
+        // Тестовый ответ
+        $(commentInputSelector).val('');
+        $('#comment-result' + index).html('<div class="valid-feedback d-block">Комментарий добавлен!</div>');
     };
 
     // Initial fetch
