@@ -8,7 +8,7 @@ from controllers.users import register, edit_profile, get_profile_with_competiti
     get_competition_details
 from database import get_db
 from models import schemes
-from models.schemes import User, UserProfile, History, CompetitionResponse
+from models.schemes import User, UserProfile, History, Token, CompetitionHistoryResponse
 
 router = APIRouter()
 
@@ -30,7 +30,7 @@ async def get_history(current_user: Annotated[User, Depends(get_current_active_u
     return get_user_history(current_user, db=db, page=page, page_size=page_size)
 
 
-@router.get("/competitions/{competition_id}", response_model=CompetitionResponse)
+@router.get("/competitions/{competition_id}", response_model=CompetitionHistoryResponse)
 async def get_competition(
         competition_id: int,
         current_user: Annotated[User, Depends(get_current_active_user)],
@@ -44,8 +44,8 @@ async def get_current_username(current_user: Annotated[User, Depends(get_current
     return current_user.username
 
 
-@router.put("/users/me/editProfile", response_model=User)
+@router.put("/users/me/editProfile", response_model=Token)
 async def edit_profile_me(current_user: Annotated[User, Depends(get_current_active_user)],
                           user_data: schemes.UserEditProfile, db: Session = Depends(get_db)):
-    edit_profile(current_user, user_data, db)
-    return current_user
+    return edit_profile(current_user, user_data, db)
+

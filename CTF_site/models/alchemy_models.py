@@ -1,8 +1,15 @@
-from sqlalchemy import Column, Integer, String, Date, ForeignKey, DateTime, Boolean, Float
+from typing import Text
+
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, DateTime, Boolean, Float, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
 Base = declarative_base()
+
+team_users = Table('team_users', Base.metadata,
+                   Column('team_id', Integer, ForeignKey('teams.id'), primary_key=True),
+                   Column('user_id', Integer, ForeignKey('users.id'), primary_key=True)
+                   )
 
 
 class User(Base):
@@ -17,6 +24,8 @@ class User(Base):
 
     tokens = relationship("Token", back_populates="user")
     competitions = relationship("Competition", back_populates="owner")
+    teams = relationship("Team", secondary=team_users, back_populates="users")
+
 
 class Token(Base):
     __tablename__ = 'tokens'
@@ -33,7 +42,6 @@ class Competition(Base):
     __tablename__ = 'competitions'
 
     id = Column(Integer, primary_key=True, index=True)
-    competition_id = Column(String, unique=True, index=True)
     date = Column(Date)
     name = Column(String)
     type = Column(String)
@@ -44,21 +52,33 @@ class Competition(Base):
 
     tasks = relationship("Task", back_populates="competition")
     teams = relationship("Team", back_populates="competition")
-
     owner = relationship("User", back_populates="competitions")
 
+
+class Available_competitions(Base):
+    __tablename__ = "available_competitions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    description = Column(String)
+    start_date = Column(DateTime)
+    duration = Column(Integer)
+    type = Column(String)
+    is_closed = Column(Boolean, default=False)
+    can_create_team = Column(Boolean, default=True)
 
 
 class Team(Base):
     __tablename__ = 'teams'
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     place = Column(Integer)
     name = Column(String)
     points = Column(Float)
     competition_id = Column(Integer, ForeignKey('competitions.id'))
 
     competition = relationship("Competition", back_populates="teams")
+    users = relationship("User", secondary=team_users, back_populates="teams")
 
 
 class Task(Base):
@@ -77,14 +97,15 @@ class TaskInfo(Base):
     __tablename__ = 'tasks_info'
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
+    name = Column(String, index=True)
     type = Column(String)
+    flag = Column(String)
     difficulty = Column(String)
     description = Column(String)
-    image = Column(String)
-    text = Column(String)
-    link = Column(String)
-    file = Column(String)
+    image = Column(String, nullable=True)
+    text = Column(String, nullable=True)
+    link = Column(String, nullable=True)
+    file = Column(String, nullable=True)
     comments = relationship("Comment", back_populates="task")
 
 
@@ -92,7 +113,8 @@ class Comment(Base):
     __tablename__ = 'comments'
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
+    content = Column(String)
+    author = Column(String)
     date = Column(DateTime)
     task_id = Column(Integer, ForeignKey('tasks_info.id'))
     task = relationship("TaskInfo", back_populates="comments")

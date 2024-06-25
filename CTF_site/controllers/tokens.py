@@ -12,7 +12,7 @@ from starlette import status
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_401_UNAUTHORIZED
 
 from database import get_db
-from models.alchemy_models import User, Token
+from models.alchemy_models import User
 from secure import pwd_context, SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, oauth2_scheme
 
 

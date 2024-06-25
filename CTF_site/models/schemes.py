@@ -1,7 +1,22 @@
 from datetime import date, datetime
+from enum import Enum
 from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
+
+
+class SortOptions(str, Enum):
+    name_asc = "name_asc"
+    name_desc = "name_desc"
+    difficulty_asc = "difficulty_asc"
+    difficulty_desc = "difficulty_desc"
+
+
+class SortCompOptions(str, Enum):
+    name_asc = "name_asc"
+    name_desc = "name_desc"
+    start_date_asc = "start_date_asc"
+    start_date_desc = "start_date_desc"
 
 
 class UserBase(BaseModel):
@@ -46,7 +61,7 @@ class TokenData(BaseModel):
     username: str | None = None
 
 
-class Competition(BaseModel):
+class HistCompetition(BaseModel):
     id: str
     date: date
     name: str
@@ -56,13 +71,36 @@ class Competition(BaseModel):
     place: int
 
 
+class CompetitionBase(BaseModel):
+    name: str
+    description: str
+    start_date: datetime = Field(alias="startDate")
+    duration: int
+    type: str
+    is_closed: bool = Field(alias="isClosed")
+    can_create_team: bool = Field(alias="canCreateTeam")
+
+
+class CompetitionCreate(CompetitionBase):
+    pass
+
+
+class Competition(CompetitionBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        from_attributes = True
+
+
 class Pagination(BaseModel):
     count: int
     current_page: int
 
 
 class History(BaseModel):
-    competition: List[Competition]
+    competition: List[HistCompetition]
     pagination: Pagination
 
 
@@ -88,7 +126,12 @@ class Team(BaseModel):
     points: float
 
 
-class CompetitionResponse(BaseModel):
+class CompetitionsResponse(BaseModel):
+    competitions: List[Competition]
+    pagination: Pagination
+
+
+class CompetitionHistoryResponse(BaseModel):
     nameOfCompetition: str
     date: datetime
     duration: str
@@ -101,19 +144,36 @@ class CompetitionResponse(BaseModel):
         orm_mode = True
 
 
+class CommentModel(BaseModel):
+    author: str
+    content: str
+    date: datetime
+    task_id: int
+
+
 class TaskFull(BaseModel):
-    id: int
     name: str
     type: str
     difficulty: str
     description: str
-    image: Optional[str]
-    text: Optional[str]
-    link: Optional[str]
-    file: Optional[str]
-    comments: List[dict]
+    id: int
+    image: Optional[str] = Field(default="")
+    text: Optional[str] = Field(default="")
+    link: Optional[str] = Field(default="")
+    file: Optional[str] = Field(default="")
+    comment: List[CommentModel] = Field(default_factory=list)
 
 
 class TaskResponse(BaseModel):
-    examples: List[TaskFull]
+    tasks: List[TaskFull]
     pagination: Pagination
+
+
+class TeamInComp(BaseModel):
+    id: int
+    name: str
+
+
+class TeamsResponse(BaseModel):
+    teams: List[TeamInComp]
+
