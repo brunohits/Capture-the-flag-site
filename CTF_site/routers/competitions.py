@@ -1,4 +1,5 @@
 from typing import Optional, Annotated
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
@@ -25,16 +26,16 @@ async def get_upcoming_competitions(
 
 
 @router.get("/{competition_id}/teams", response_model=TeamsResponse)
-async def get_teams(competition_id: int,
+async def get_teams(competition_id: UUID,
                     db: Session = Depends(get_db)):
     return get_competition_teams(competition_id, db)
 
 
 @router.post("/teams/{competition_id}/join_or_create")
 async def join_or_create_team_route(
-        competition_id: int,
+        competition_id: UUID,
         current_user: Annotated[User, Depends(get_current_active_user)],
-        team_id: Optional[int] = None,
+        team_id: Optional[UUID] = None,
         new_team_name: Optional[str] = None,
         enter_code: Optional[int] = None,
         db: Session = Depends(get_db)

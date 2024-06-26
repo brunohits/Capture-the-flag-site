@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from enum import Enum
 from typing import List, Optional
+from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -17,11 +18,6 @@ class SortCompOptions(str, Enum):
     name_desc = "name_desc"
     start_date_asc = "start_date_asc"
     start_date_desc = "start_date_desc"
-
-
-# class TaskType(str, Enum):
-#     hack = "Взлом"
-#     Cryptography = "Криптография"
 
 
 class UserBase(BaseModel):
@@ -41,14 +37,14 @@ class UserEditProfile(UserBase):
 
 
 class ShortUser(UserBase):
-    id: int
+    id: UUID
 
     class Config:
         from_attributes = True
 
 
 class User(UserBase):
-    id: int
+    id: UUID
     username: str
     create_time: date
     disabled: bool
@@ -70,7 +66,7 @@ class TokenData(BaseModel):
 
 
 class HistCompetition(BaseModel):
-    id: int
+    id: UUID
     date: str
     name: str
     type: str
@@ -80,7 +76,7 @@ class HistCompetition(BaseModel):
 
 
 class Competition(BaseModel):
-    id: int
+    id: UUID
     name: str
     description: str
     start_date: datetime
@@ -147,11 +143,11 @@ class CommentModel(BaseModel):
     author: str
     content: str
     date: datetime
-    task_id: int
+    task_id: UUID
 
 
 class TaskFull(BaseModel):
-    id: int
+    id: UUID
     name: str
     type: str
     difficulty: Optional[str] = ""
@@ -169,7 +165,7 @@ class TaskResponse(BaseModel):
 
 
 class TeamInComp(BaseModel):
-    id: int
+    id: UUID
     name: str
 
 
@@ -178,7 +174,7 @@ class TeamsResponse(BaseModel):
 
 
 class TaskWithPoints(BaseModel):
-    task_id: int
+    task_id: UUID
     points: int
 
 

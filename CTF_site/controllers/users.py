@@ -211,7 +211,7 @@ def get_competition_details(competition_id, current_user, db):
     result = {
         "nameOfCompetition": competition.name,
         "start_date": competition.start_date.isoformat(),
-        "duration": competition.end_date,
+        "end_date": competition.end_date,
         "placeOfYourSquad": user_team.place,
         "pointsOfYourSquad": user_team.points,
         "tasks": [

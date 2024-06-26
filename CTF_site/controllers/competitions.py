@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from uuid import uuid4
 
 from fastapi import HTTPException
 from sqlalchemy import asc, desc, and_, func, text
@@ -91,10 +92,7 @@ def join_or_create_team(competition_id, current_user, team_id, new_team_name, en
             raise HTTPException(status_code=403, detail="Invalid enter code for private competition")
 
     if new_team_name:
-        last_team = db.query(Team).order_by(Team.id.desc()).first()
-        new_id = last_team.id + 1 if last_team else 1
-        # Create a new team
-        new_team = Team(id=new_id, name=new_team_name, competition_id=competition_id)
+        new_team = Team(id=uuid4(), name=new_team_name, competition_id=competition_id)
         db.add(new_team)
         db.commit()
         db.refresh(new_team)
@@ -120,14 +118,10 @@ def join_or_create_team(competition_id, current_user, team_id, new_team_name, en
 
 
 def create_competition(db, current_user, comp_body):
-    # Validate that the specified team exists
-    team = db.query(Team).filter(Team.name == comp_body.owner_team_name).first()
-    if not team:
-        raise HTTPException(status_code=404, detail="Specified team does not exist")
+    # Create a new team
 
-    # Check if the current user is part of this team
-    if current_user not in team.users:
-        raise HTTPException(status_code=403, detail="User is not part of the specified team")
+
+
 
     # Create a new competition instance
     new_competition = Competition(
@@ -143,11 +137,25 @@ def create_competition(db, current_user, comp_body):
         enter_code=comp_body.enter_code,
         owner_id=current_user.id  # Assuming the owner is the current user
     )
-
-    # Add the competition to the session
     db.add(new_competition)
     db.commit()
     db.refresh(new_competition)  # Refresh to get the generated ID
+
+
+    new_team = Team(name=comp_body.owner_team_name, competition_id=new_competition.id)  # competition_id will be set later
+    db.add(new_team)
+    db.commit()
+    db.refresh(new_team)  # Refresh to get the generated ID
+    # Add the competition to the session
+    # Add current user to the new team
+    db.execute(
+        team_users.insert().values(team_id=new_team.id, user_id=current_user.id)
+    )
+    db.commit()
+
+    # Update the competition_id of the newly created team
+    new_team.competition_id = new_competition.id
+    db.commit()
 
     # Link selected tasks to the new competition using the association table
     for task_with_points in comp_body.tasks:

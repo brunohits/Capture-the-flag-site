@@ -1,4 +1,5 @@
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
@@ -32,7 +33,7 @@ async def get_history(current_user: Annotated[User, Depends(get_current_active_u
 
 @router.get("/competitions/{competition_id}", response_model=CompetitionResponse)
 async def get_competition(
-        competition_id: int,
+        competition_id: UUID,
         current_user: Annotated[User, Depends(get_current_active_user)],
         db: Session = Depends(get_db)
 ):

@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
@@ -22,5 +23,5 @@ def post_comment(task_id, content, current_user: Annotated[User, Depends(get_cur
 
 
 @router.get('/get_task_comments')
-def get_task_comments(task_id: int, db: Session = Depends(get_db)):
+def get_task_comments(task_id: UUID, db: Session = Depends(get_db)):
     return get_comments(task_id, db)
