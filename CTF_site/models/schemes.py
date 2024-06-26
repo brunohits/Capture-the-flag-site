@@ -8,8 +8,8 @@ from pydantic import BaseModel, EmailStr, Field
 class SortOptions(str, Enum):
     name_asc = "name_asc"
     name_desc = "name_desc"
-    difficulty_asc = "difficulty_asc"
-    difficulty_desc = "difficulty_desc"
+    difficulty_asc = "points_asc"
+    difficulty_desc = "points_desc"
 
 
 class SortCompOptions(str, Enum):
@@ -74,7 +74,7 @@ class HistCompetition(BaseModel):
     date: str
     name: str
     type: str
-    duration: int
+    end_date: datetime
     points: float
     place: int
 
@@ -84,7 +84,7 @@ class Competition(BaseModel):
     name: str
     description: str
     start_date: datetime
-    duration: int
+    end_date: datetime
     type: str
     is_private: bool
     can_create_team: bool
@@ -133,7 +133,7 @@ class CompetitionsResponse(BaseModel):
 class CompetitionResponse(BaseModel):
     nameOfCompetition: str
     start_date: datetime
-    duration: int
+    end_date: datetime
     placeOfYourSquad: int
     pointsOfYourSquad: float
     tasks: List[Task]
@@ -177,15 +177,20 @@ class TeamsResponse(BaseModel):
     teams: List[TeamInComp]
 
 
+class TaskWithPoints(BaseModel):
+    task_id: int
+    points: int
+
+
 class CompCreateScheme(BaseModel):
     name: str
     description: str
     start_date: datetime
-    duration: int
+    end_date: datetime
     type: str
     max_teams: int
     team_size: int
     owner_team_name: str
     is_private: bool = Field(default="false")
     enter_code: Optional[int] = Field(alias="enter_code")  # Assuming 'code' can be optional and is a string
-    tasks: List[int]  # List of task IDs
+    tasks: List[TaskWithPoints]  # List of task IDs

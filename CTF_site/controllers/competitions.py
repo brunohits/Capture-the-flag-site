@@ -1,10 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from fastapi import HTTPException
-from sqlalchemy import asc, desc
+from sqlalchemy import asc, desc, and_, func, text
 from sqlalchemy.exc import IntegrityError
 
-from models.alchemy_models import Competition, Team, Task, Task
+from models.alchemy_models import Competition, Team, Task, Task, competition_tasks, team_users
 from models.schemes import SortCompOptions, CompCreateScheme
 
 
@@ -48,7 +48,7 @@ def get_competitions_list(db, page, filter_type, sort, name):
             "type": comp.type,
             "description": comp.description,
             "start_date": comp.start_date.isoformat(),  # Ensure datetime is in ISO format
-            "duration": comp.duration,
+            "end_date": comp.end_date,
             "is_private": comp.is_private,
             "can_create_team": comp.can_create_team
         })
@@ -124,7 +124,7 @@ def create_competition(db, current_user, comp_body):
         name=comp_body.name,
         description=comp_body.description,
         start_date=comp_body.start_date,
-        duration=comp_body.duration,
+        end_date=comp_body.end_date,
         type=comp_body.type,
         maxTeams=comp_body.max_teams,
         teamSize=comp_body.team_size,
@@ -140,13 +140,87 @@ def create_competition(db, current_user, comp_body):
     db.refresh(new_competition)  # Refresh to get the generated ID
 
     # Link selected tasks to the new competition using the association table
-    task_infos = db.query(Task).filter(Task.id.in_(comp_body.tasks)).all()
-    if len(task_infos) != len(comp_body.tasks):
-        raise HTTPException(status_code=404, detail="One or more tasks not found")
+    for task_with_points in comp_body.tasks:
+        task = db.query(Task).filter(Task.id == task_with_points.task_id).first()
+        if not task:
+            raise HTTPException(status_code=404, detail=f"Task with ID {task_with_points.task_id} not found")
 
-    new_competition.tasks = task_infos  # Link tasks to competition through the association table
+        # Insert the task with points into the competition_tasks table
+        db.execute(
+            competition_tasks.insert().values(
+                competition_id=new_competition.id,
+                task_id=task.id,
+                points=task_with_points.points
+            )
+        )
 
     # Commit again to save the tasks linked to the competition
     db.commit()
 
-    return {"message": "Competition successfully created with associated tasks"}
+    return {"message": "Competition successfully created with associated tasks and points"}
+
+
+def get_active_competition(current_user, db):
+    # Get the current time
+    now = datetime.now()
+
+    # Find all teams where current_user is a member
+    teams = db.query(Team).join(team_users).filter(team_users.c.user_id == current_user.id).all()
+    if not teams:
+        raise HTTPException(status_code=404, detail="User is not part of any team")
+
+    # Iterate through each team and find the ongoing competition
+    for team in teams:
+        competition_id = team.competition_id
+        if not competition_id:
+            continue
+
+        # Find the ongoing competition for this team
+        competition = db.query(Competition).filter(
+            and_(
+                Competition.id == competition_id,
+                Competition.start_date <= now,
+                Competition.end_date >= now
+            )
+        ).first()
+        if competition:
+            # Fetch all teams participating in the competition
+            teams_in_competition = db.query(Team).filter(Team.competition_id == competition.id).all()
+            teams_list = [{"name": t.name, "score": t.points} for t in teams_in_competition]
+
+            # Fetch tasks associated with the competition
+            tasks_with_details = db.query(Task, competition_tasks.c.points).join(
+                competition_tasks, Task.id == competition_tasks.c.task_id).filter(
+                competition_tasks.c.competition_id == competition.id).all()
+            tasks_list = [
+                {
+                    "id": task.id,
+                    "name": task.name,
+                    "type": task.type,
+                    "points": task.points,
+                    "description": task.description,
+                    "image": task.image,
+                    "text": task.text,
+                    "link": task.link,
+                    "file": task.file
+                } for task, points in tasks_with_details
+            ]
+
+            # Create response
+            response = {
+                "name": competition.name,
+                "description": competition.description,
+                "startDate": competition.start_date.isoformat(),
+                "endDate": competition.end_date.isoformat(),
+                "team": {
+                    "id": team.id,
+                    "name": team.name,
+                    "score": team.points
+                },
+                "teams": teams_list,
+                "tasks": tasks_list
+            }
+
+            return response
+
+    raise HTTPException(status_code=400, detail="No ongoing competition")

@@ -27,10 +27,10 @@ def get_tasks_info(page, sort, filter_type, name, db):
             query = query.order_by(asc(Task.name))
         elif sort == 'name_desc':
             query = query.order_by(desc(Task.name))
-        elif sort == 'difficulty_asc':
-            query = query.order_by(asc(Task.difficulty))
-        elif sort == 'difficulty_desc':
-            query = query.order_by(desc(Task.difficulty))
+        elif sort == 'points_asc':
+            query = query.order_by(asc(Task.points))
+        elif sort == 'points_desc':
+            query = query.order_by(desc(Task.points))
 
     # Пагинация
     page_size = 10
@@ -47,7 +47,7 @@ def get_tasks_info(page, sort, filter_type, name, db):
         tasks.append(TaskFull(
             name=task.name,
             type=task.type,
-            difficulty=task.difficulty,
+            points=task.points,
             description=task.description,
             id=task.id,
             image=task.image or "",
@@ -114,7 +114,7 @@ def check_if_flag_correct_in_comp(task_id, current_user, user_flag, db):
         )
 
         # Update team's points
-        team.points += points
+        team.points = (team.points or 0) + points
 
         # Commit the transaction
         db.commit()

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from controllers.competitions import get_competitions_list, get_competition_teams, join_or_create_team, \
-    create_competition
+    create_competition, get_active_competition
 from controllers.tokens import get_current_active_user
 from database import get_db
 from models.schemes import CompetitionsResponse, SortCompOptions, TeamsResponse, User, CompCreateScheme
@@ -49,3 +49,9 @@ async def create_competition_route(
         db: Session = Depends(get_db)
 ):
     return create_competition(db, current_user, comp_data)
+
+
+@router.get("/active_competition")
+async def get_active_competition_route(current_user: Annotated[User, Depends(get_current_active_user)],
+                                       db: Session = Depends(get_db)):
+    return get_active_competition(current_user, db)

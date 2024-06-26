@@ -35,34 +35,68 @@ def register(user_data: UserCreateScheme, db: Session):
 
 def get_profile_with_competitions(current_user, db: Session, page: int = Query(1, ge=1),
                                   page_size: int = Query(10, ge=1, le=100)):
-    total_competitions = db.query(func.count(Competition.id)).filter(Competition.user_id == current_user.id).scalar()
+    # Query to find the total number of competitions for pagination
+    total_competitions = db.query(func.count(Competition.id)).join(Team).join(team_users).filter(
+        team_users.c.user_id == current_user.id,
+        Team.competition_id == Competition.id
+    ).scalar()
 
-    competitions = db.query(Competition).filter(Competition.user_id == current_user.id) \
-        .offset((page - 1) * page_size).limit(page_size).all()
-    competition_list = [
-        CompetitionScheme(
-            id=comp.competition_id,
-            date=comp.date,
+    # Query to get the competitions and associated team points
+    competitions_with_points = db.query(
+        Competition,
+        Team.points.label('team_points'),
+        Team.competition_id.label('comp_id')
+    ).join(Team).join(team_users).filter(
+        team_users.c.user_id == current_user.id,
+        Team.competition_id == Competition.id
+    ).offset((page - 1) * page_size).limit(page_size).all()
+
+    if not competitions_with_points:
+        raise HTTPException(status_code=404, detail="No competitions found for the user")
+
+    competition_list = []
+    for comp, team_points, comp_id in competitions_with_points:
+        # Get all teams in the current competition to calculate the place
+        teams_in_competition = db.query(Team).filter(Team.competition_id == comp_id).order_by(Team.points.desc()).all()
+
+        # Find the place of the user's team in the competition
+        for index, team in enumerate(teams_in_competition):
+            if team.users and current_user.id in [user.id for user in team.users]:
+                place = index + 1
+                break
+        else:
+            place = None
+
+        competition_list.append(CompetitionScheme(
+            id=comp.id,
+            date=comp.start_date.isoformat(),
             name=comp.name,
             type=comp.type,
-            duration=comp.duration,
-            points=comp.points,
-            place=comp.place
-        ) for comp in competitions
-    ]
+            duration=comp.end_date,
+            points=team_points,  # Points from the teams table
+            place=place  # Calculated place
+        ))
 
-    pagination = Pagination(count=total_competitions, current_page=page)
+    # Create Pagination object
+    pagination = Pagination(
+        count=total_competitions,
+        current_page=page,
+        total_pages=(total_competitions // page_size) + (1 if total_competitions % page_size != 0 else 0)
+    )
 
+    # Create Profile object
     profile = Profile(
         username=current_user.username,
         email=current_user.email
     )
 
+    # Create History object
     history = History(
         competition=competition_list,
         pagination=pagination
     )
 
+    # Create and return UserProfile object
     return UserProfile(profile=profile, history=history)
 
 
@@ -104,7 +138,7 @@ def get_user_history(current_user, db: Session, page: int, page_size: int):
             date=comp.start_date.isoformat(),
             name=comp.name,
             type=comp.type,
-            duration=comp.duration,
+            duration=comp.end_date,
             points=team_points,  # Points from the teams table
             place=place  # Calculated place
         ))
@@ -123,6 +157,7 @@ def get_user_history(current_user, db: Session, page: int, page_size: int):
     )
 
     return history
+
 
 def edit_profile(current_user, user_data: UserEditProfile, db: Session):
     try:
@@ -176,7 +211,7 @@ def get_competition_details(competition_id, current_user, db):
     result = {
         "nameOfCompetition": competition.name,
         "start_date": competition.start_date.isoformat(),
-        "duration": competition.duration,
+        "duration": competition.end_date,
         "placeOfYourSquad": user_team.place,
         "pointsOfYourSquad": user_team.points,
         "tasks": [
