@@ -36,9 +36,10 @@ async def join_or_create_team_route(
         current_user: Annotated[User, Depends(get_current_active_user)],
         team_id: Optional[int] = None,
         new_team_name: Optional[str] = None,
+        enter_code: Optional[int] = None,
         db: Session = Depends(get_db)
 ):
-    return join_or_create_team(competition_id, current_user, team_id, new_team_name, db)
+    return join_or_create_team(competition_id, current_user, team_id, new_team_name,enter_code, db)
 
 
 #

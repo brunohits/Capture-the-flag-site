@@ -79,12 +79,22 @@ def get_competition_teams(competition_id, db):
     return {"teams": teams}
 
 
-def join_or_create_team(competition_id, current_user, team_id, newTeamName, db):
-    if newTeamName:
+def join_or_create_team(competition_id, current_user, team_id, new_team_name, enter_code, db):
+    # Query the competition
+    competition = db.query(Competition).filter(Competition.id == competition_id).first()
+    if not competition:
+        raise HTTPException(status_code=404, detail="Competition not found")
+    print(enter_code, competition.enter_code, enter_code == competition.enter_code)
+    # Check if competition is private and validate enter_code
+    if competition.is_private:
+        if enter_code is None or enter_code != competition.enter_code:
+            raise HTTPException(status_code=403, detail="Invalid enter code for private competition")
+
+    if new_team_name:
         last_team = db.query(Team).order_by(Team.id.desc()).first()
         new_id = last_team.id + 1 if last_team else 1
         # Create a new team
-        new_team = Team(id=new_id, name=newTeamName, competition_id=competition_id)
+        new_team = Team(id=new_id, name=new_team_name, competition_id=competition_id)
         db.add(new_team)
         db.commit()
         db.refresh(new_team)
