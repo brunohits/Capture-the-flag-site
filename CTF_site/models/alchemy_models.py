@@ -1,7 +1,8 @@
 import uuid
 from typing import Text, Optional, List
 
-from sqlalchemy import Column, Integer, String, Date, ForeignKey, DateTime, Boolean, Float, Table, Enum, UUID
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, DateTime, Boolean, Float, Table, Enum, UUID, \
+    LargeBinary
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -98,7 +99,7 @@ class Task(Base):
     flag = Column(String)
     points = Column(Integer)
     description = Column(String)
-    image = Column(String, nullable=True)
+    image = Column(LargeBinary, nullable=True)
     text = Column(String, nullable=True)
     link = Column(String, nullable=True)
     file = Column(String, nullable=True)

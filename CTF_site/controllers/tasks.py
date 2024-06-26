@@ -7,62 +7,41 @@ from sqlalchemy.orm import Session, joinedload
 
 from database import get_db
 from models.alchemy_models import Task, Task, team_users, Team, team_tasks, competition_tasks
-from models.schemes import TaskFull, CommentModel, TaskResponse, SortOptions
+from models.schemes import TaskFull, CommentModel, TaskResponse, SortOptions, Pagination
 
 
 def get_tasks_info(page, sort, filter_type, name, db):
-    query = db.query(Task).options(joinedload(Task.comments))
+    query = db.query(Task)
 
-    # Применение фильтрации
+    # Apply filtering by type
     if filter_type:
         query = query.filter(Task.type == filter_type)
 
-    # Применение поиска по имени
+    # Apply name search
     if name:
         query = query.filter(Task.name.contains(name))
 
-    # Применение сортировки
+    # Apply sorting
     if sort:
-        if sort == 'name_asc':
+        if sort == "name_asc":
             query = query.order_by(asc(Task.name))
-        elif sort == 'name_desc':
+        elif sort == "name_desc":
             query = query.order_by(desc(Task.name))
-        elif sort == 'points_asc':
-            query = query.order_by(asc(Task.points))
-        elif sort == 'points_desc':
-            query = query.order_by(desc(Task.points))
+        elif sort == "difficulty_asc":
+            query = query.order_by(asc(Task.difficulty))
+        elif sort == "difficulty_desc":
+            query = query.order_by(desc(Task.difficulty))
 
-    # Пагинация
+    # Pagination
     page_size = 10
     total_count = query.count()
-    task_list = query.offset((page - 1) * page_size).limit(page_size).all()
+    tasks = query.offset((page - 1) * page_size).limit(page_size).all()
 
-    # Формирование списка задач с комментариями
-    tasks = []
-    for task in task_list:
-        task_comments = [
-            CommentModel(author=comment.author, content=comment.content, date=comment.date, task_id=comment.task_id) for
-            comment in task.comments]
+    task_list = [TaskFull.from_orm(task) for task in tasks]
 
-        tasks.append(TaskFull(
-            name=task.name,
-            type=task.type,
-            points=task.points,
-            description=task.description,
-            id=task.id,
-            image=task.image or "",
-            text=task.text or "",
-            link=task.link or "",
-            file=task.file or "",
-            comment=task_comments
-        ))
+    pagination = Pagination(count=total_count, current_page=page)
 
-    pagination = {
-        "count": total_count,
-        "current_page": page
-    }
-
-    return TaskResponse(tasks=tasks, pagination=pagination)
+    return TaskResponse(tasks=task_list, pagination=pagination)
 
 
 def check_if_flag_correct(task_id, user_flag, db):

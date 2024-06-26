@@ -1,3 +1,4 @@
+from base64 import b64encode
 from datetime import date, datetime
 from enum import Enum
 from typing import List, Optional
@@ -150,13 +151,28 @@ class TaskFull(BaseModel):
     id: UUID
     name: str
     type: str
-    difficulty: Optional[str] = ""
+    points: Optional[str] = ""
     description: Optional[str] = ""
     image: Optional[str] = ""
     text: Optional[str] = ""
     link: Optional[str] = ""
     file: Optional[str] = ""
     comment: List[CommentModel]
+
+    @classmethod
+    def from_orm(cls, task):
+        return cls(
+            id=task.id,
+            name=task.name,
+            type=task.type,
+            points=task.points,
+            description=task.description,
+            image=b64encode(task.image).decode('utf-8') if task.image else None,
+            text=task.text,
+            link=task.link,
+            file=task.file,
+            comment=[CommentModel.from_orm(comment) for comment in task.comments]
+        )
 
 
 class TaskResponse(BaseModel):

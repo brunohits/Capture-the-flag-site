@@ -51,8 +51,8 @@ def get_profile_with_competitions(current_user, db: Session, page: int = Query(1
         Team.competition_id == Competition.id
     ).offset((page - 1) * page_size).limit(page_size).all()
 
-    if not competitions_with_points:
-        raise HTTPException(status_code=404, detail="No competitions found for the user")
+    # if not competitions_with_points:
+    #     raise HTTPException(status_code=404, detail="No competitions found for the user")
 
     competition_list = []
     for comp, team_points, comp_id in competitions_with_points:
