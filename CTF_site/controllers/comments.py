@@ -5,13 +5,13 @@ from sqlalchemy.exc import IntegrityError
 from starlette import status
 from starlette.responses import Response
 
-from models.alchemy_models import TaskInfo, Comment
+from models.alchemy_models import Task, Comment
 from models.schemes import CommentModel
 
 
 def add_comment(task_id, content, db, current_user):
     # Query the task by task_id
-    task = db.query(TaskInfo).filter(TaskInfo.id == task_id).first()
+    task = db.query(Task).filter(Task.id == task_id).first()
 
     # Check if task exists
     if not task:
@@ -39,7 +39,7 @@ def add_comment(task_id, content, db, current_user):
 
 
 def get_comments(task_id, db):
-    task = db.query(TaskInfo).filter(TaskInfo.id == task_id).first()
+    task = db.query(Task).filter(Task.id == task_id).first()
     if not task:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
 

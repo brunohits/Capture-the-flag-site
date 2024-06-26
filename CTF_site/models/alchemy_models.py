@@ -4,15 +4,25 @@ from sqlalchemy import Column, Integer, String, Date, ForeignKey, DateTime, Bool
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-
 Base = declarative_base()
 
+# Association table for many-to-many relationship between Team and User
 team_users = Table('team_users', Base.metadata,
                    Column('team_id', Integer, ForeignKey('teams.id'), primary_key=True),
                    Column('user_id', Integer, ForeignKey('users.id'), primary_key=True)
                    )
+# Association table for many-to-many relationship between Competition and Task
+competition_tasks = Table('competition_tasks', Base.metadata,
+                          Column('competition_id', Integer, ForeignKey('competitions.id'), primary_key=True),
+                          Column('task_id', Integer, ForeignKey('all_tasks.id'), primary_key=True),
+                          Column("points",Integer)
+                          )
 
-
+team_tasks = Table('team_tasks', Base.metadata,
+                   Column('team_id', Integer, ForeignKey('teams.id'), primary_key=True),
+                   Column('task_id', Integer, ForeignKey('all_tasks.id'), primary_key=True),
+                   Column('resolved_at', DateTime)  # Optional: To track when the task was resolved
+                   )
 class User(Base):
     __tablename__ = 'users'
 
@@ -40,26 +50,9 @@ class Token(Base):
 
 
 class Competition(Base):
-    __tablename__ = 'competitions'
+    __tablename__ = "competitions"
 
-    id = Column(Integer, primary_key=True, index=True)
-    date = Column(Date)
-    name = Column(String)
-    type = Column(String)
-    duration = Column(String)
-    points = Column(Float)
-    place = Column(Integer)
-    user_id = Column(Integer, ForeignKey('users.id'))
-
-    tasks = relationship("Task", back_populates="competition")
-    teams = relationship("Team", back_populates="competition")
-    owner = relationship("User", back_populates="competitions")
-
-
-class AvailableCompetitions(Base):
-    __tablename__ = "available_competitions"
-
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, index=True)
     description = Column(String)
     start_date = Column(DateTime)
@@ -70,8 +63,12 @@ class AvailableCompetitions(Base):
     owner_team_name = Column(String)
     is_private = Column(Boolean, default=False)
     can_create_team = Column(Boolean, default=True)
-    enter_code = Column(Integer, nullable=True, unique=True)  # Assuming 'code' can be optional and is a string
-    tasks = List[int]  # List of task IDs
+    enter_code = Column(Integer, nullable=True, unique=True)
+    owner_id = Column(Integer, ForeignKey('users.id'))
+
+    owner = relationship("User", back_populates="competitions")
+    tasks = relationship("Task", secondary=competition_tasks, back_populates="competitions")
+    teams = relationship("Team", back_populates="competition")
 
 
 class Team(Base):
@@ -85,22 +82,10 @@ class Team(Base):
 
     competition = relationship("Competition", back_populates="teams")
     users = relationship("User", secondary=team_users, back_populates="teams")
-
+    resolved_tasks = relationship("Task", secondary=team_tasks, back_populates="teams_resolved")
 
 class Task(Base):
-    __tablename__ = 'tasks'
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
-    points = Column(Float)
-    is_resolved = Column(Boolean, default=False)
-    competition_id = Column(Integer, ForeignKey('competitions.id'))
-
-    competition = relationship("Competition", back_populates="tasks")
-
-
-class TaskInfo(Base):
-    __tablename__ = 'tasks_info'
+    __tablename__ = 'all_tasks'
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, index=True)
@@ -112,9 +97,11 @@ class TaskInfo(Base):
     text = Column(String, nullable=True)
     link = Column(String, nullable=True)
     file = Column(String, nullable=True)
+    competition_id = Column(Integer, ForeignKey('competitions.id'), nullable=True)
 
+    competitions = relationship("Competition", secondary=competition_tasks, back_populates="tasks")
     comments = relationship("Comment", back_populates="task")
-
+    teams_resolved = relationship("Team", secondary=team_tasks, back_populates="resolved_tasks")
 
 class Comment(Base):
     __tablename__ = 'comments'
@@ -123,5 +110,6 @@ class Comment(Base):
     content = Column(String)
     author = Column(String)
     date = Column(DateTime)
-    task_id = Column(Integer, ForeignKey('tasks_info.id'))
-    task = relationship("TaskInfo", back_populates="comments")
+    task_id = Column(Integer, ForeignKey('all_tasks.id'))
+
+    task = relationship("Task", back_populates="comments")

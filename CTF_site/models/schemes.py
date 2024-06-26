@@ -70,11 +70,11 @@ class TokenData(BaseModel):
 
 
 class HistCompetition(BaseModel):
-    id: str
-    date: date
+    id: int
+    date: str
     name: str
     type: str
-    duration: str
+    duration: int
     points: float
     place: int
 
@@ -86,7 +86,7 @@ class Competition(BaseModel):
     start_date: datetime
     duration: int
     type: str
-    is_closed: bool
+    is_private: bool
     can_create_team: bool
 
     class Config:
@@ -130,10 +130,10 @@ class CompetitionsResponse(BaseModel):
     pagination: Pagination
 
 
-class CompetitionHistoryResponse(BaseModel):
+class CompetitionResponse(BaseModel):
     nameOfCompetition: str
-    date: datetime
-    duration: str
+    start_date: datetime
+    duration: int
     placeOfYourSquad: int
     pointsOfYourSquad: float
     tasks: List[Task]
@@ -180,11 +180,12 @@ class TeamsResponse(BaseModel):
 class CompCreateScheme(BaseModel):
     name: str
     description: str
-    start_date: datetime = Field(..., alias='startDate')
+    start_date: datetime
     duration: int
-    max_teams: int = Field(..., alias='maxTeams')
-    team_size: int = Field(..., alias='teamSize')
-    team_name: str = Field(..., alias='teamName')
-    is_private: bool = Field(..., alias='isPrivate')
+    type: str
+    max_teams: int
+    team_size: int
+    owner_team_name: str
+    is_private: bool = Field(default="false")
     enter_code: Optional[int] = Field(alias="enter_code")  # Assuming 'code' can be optional and is a string
     tasks: List[int]  # List of task IDs

@@ -9,7 +9,7 @@ from starlette import status
 from controllers.comments import add_comment, get_comments
 from controllers.tokens import get_current_active_user
 from database import get_db
-from models.alchemy_models import TaskInfo
+from models.alchemy_models import Task
 from models.schemes import User, CommentModel
 
 router = APIRouter()
