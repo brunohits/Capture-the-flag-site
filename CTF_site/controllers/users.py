@@ -72,7 +72,7 @@ def get_profile_with_competitions(current_user, db: Session, page: int = Query(1
             date=comp.start_date.isoformat(),
             name=comp.name,
             type=comp.type,
-            duration=comp.end_date,
+            end_date=comp.end_date,
             points=team_points,  # Points from the teams table
             place=place  # Calculated place
         ))
@@ -138,7 +138,7 @@ def get_user_history(current_user, db: Session, page: int, page_size: int):
             date=comp.start_date.isoformat(),
             name=comp.name,
             type=comp.type,
-            duration=comp.end_date,
+            end_date=comp.end_date,
             points=team_points,  # Points from the teams table
             place=place  # Calculated place
         ))
