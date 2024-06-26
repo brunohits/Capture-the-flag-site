@@ -2,19 +2,19 @@ from typing import Optional
 
 from fastapi import HTTPException, Depends
 from sqlalchemy import text, asc, desc
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from database import get_db
 from models.alchemy_models import TaskInfo, Task
 from models.schemes import TaskFull, CommentModel, TaskResponse, SortOptions
 
 
-def get_tasks_info(page, sort, filter, name, db):
-    query = db.query(TaskInfo)
+def get_tasks_info(page, sort, filter_type, name, db):
+    query = db.query(TaskInfo).options(joinedload(TaskInfo.comments))
 
     # Применение фильтрации
-    if filter:
-        query = query.filter(TaskInfo.type == filter)
+    if filter_type:
+        query = query.filter(TaskInfo.type == filter_type)
 
     # Применение поиска по имени
     if name:
@@ -22,13 +22,13 @@ def get_tasks_info(page, sort, filter, name, db):
 
     # Применение сортировки
     if sort:
-        if sort == SortOptions.name_asc:
+        if sort == 'name_asc':
             query = query.order_by(asc(TaskInfo.name))
-        elif sort == SortOptions.name_desc:
+        elif sort == 'name_desc':
             query = query.order_by(desc(TaskInfo.name))
-        elif sort == SortOptions.difficulty_asc:
+        elif sort == 'difficulty_asc':
             query = query.order_by(asc(TaskInfo.difficulty))
-        elif sort == SortOptions.difficulty_desc:
+        elif sort == 'difficulty_desc':
             query = query.order_by(desc(TaskInfo.difficulty))
 
     # Пагинация
@@ -39,7 +39,8 @@ def get_tasks_info(page, sort, filter, name, db):
     # Формирование списка задач с комментариями
     tasks = []
     for task in task_list:
-        task_comments = [CommentModel(name=comment.name, date=comment.date) for comment in task.comments]
+        task_comments = [CommentModel(author=comment.author, content=comment.content, date=comment.date, task_id=comment.task_id) for comment in task.comments]
+
         tasks.append(TaskFull(
             name=task.name,
             type=task.type,
@@ -61,7 +62,7 @@ def get_tasks_info(page, sort, filter, name, db):
     return TaskResponse(tasks=tasks, pagination=pagination)
 
 
-def check_if_flag_correct(task_id,user_flag, db):
+def check_if_flag_correct(task_id, user_flag, db):
     # Query the task by task_id
     task = db.query(TaskInfo).filter(TaskInfo.id == task_id).first()
 
@@ -69,4 +70,3 @@ def check_if_flag_correct(task_id,user_flag, db):
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     return True if user_flag == task.flag else False
-

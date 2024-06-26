@@ -19,6 +19,11 @@ class SortCompOptions(str, Enum):
     start_date_desc = "start_date_desc"
 
 
+# class TaskType(str, Enum):
+#     hack = "Взлом"
+#     Cryptography = "Криптография"
+
+
 class UserBase(BaseModel):
     email: EmailStr
 
@@ -29,7 +34,10 @@ class UserCreate(UserBase):
 
 
 UserLogin = UserCreate
-UserEditProfile = UserCreate
+
+
+class UserEditProfile(UserBase):
+    username: str
 
 
 class ShortUser(UserBase):
@@ -71,27 +79,18 @@ class HistCompetition(BaseModel):
     place: int
 
 
-class CompetitionBase(BaseModel):
+class Competition(BaseModel):
+    id: int
     name: str
     description: str
-    start_date: datetime = Field(alias="startDate")
+    start_date: datetime
     duration: int
     type: str
-    is_closed: bool = Field(alias="isClosed")
-    can_create_team: bool = Field(alias="canCreateTeam")
-
-
-class CompetitionCreate(CompetitionBase):
-    pass
-
-
-class Competition(CompetitionBase):
-    id: int
+    is_closed: bool
+    can_create_team: bool
 
     class Config:
         orm_mode = True
-        allow_population_by_field_name = True
-        from_attributes = True
 
 
 class Pagination(BaseModel):
@@ -152,16 +151,16 @@ class CommentModel(BaseModel):
 
 
 class TaskFull(BaseModel):
+    id: int
     name: str
     type: str
-    difficulty: str
-    description: str
-    id: int
-    image: Optional[str] = Field(default="")
-    text: Optional[str] = Field(default="")
-    link: Optional[str] = Field(default="")
-    file: Optional[str] = Field(default="")
-    comment: List[CommentModel] = Field(default_factory=list)
+    difficulty: Optional[str] = ""
+    description: Optional[str] = ""
+    image: Optional[str] = ""
+    text: Optional[str] = ""
+    link: Optional[str] = ""
+    file: Optional[str] = ""
+    comment: List[CommentModel]
 
 
 class TaskResponse(BaseModel):
@@ -177,3 +176,15 @@ class TeamInComp(BaseModel):
 class TeamsResponse(BaseModel):
     teams: List[TeamInComp]
 
+
+class CompCreateScheme(BaseModel):
+    name: str
+    description: str
+    start_date: datetime = Field(..., alias='startDate')
+    duration: int
+    max_teams: int = Field(..., alias='maxTeams')
+    team_size: int = Field(..., alias='teamSize')
+    team_name: str = Field(..., alias='teamName')
+    is_private: bool = Field(..., alias='isPrivate')
+    enter_code: Optional[int] = Field(alias="enter_code")  # Assuming 'code' can be optional and is a string
+    tasks: List[int]  # List of task IDs

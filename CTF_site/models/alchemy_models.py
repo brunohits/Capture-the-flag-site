@@ -1,8 +1,9 @@
-from typing import Text
+from typing import Text, Optional, List
 
-from sqlalchemy import Column, Integer, String, Date, ForeignKey, DateTime, Boolean, Float, Table
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, DateTime, Boolean, Float, Table, Enum
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+
 
 Base = declarative_base()
 
@@ -55,7 +56,7 @@ class Competition(Base):
     owner = relationship("User", back_populates="competitions")
 
 
-class Available_competitions(Base):
+class AvailableCompetitions(Base):
     __tablename__ = "available_competitions"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -64,8 +65,13 @@ class Available_competitions(Base):
     start_date = Column(DateTime)
     duration = Column(Integer)
     type = Column(String)
-    is_closed = Column(Boolean, default=False)
+    maxTeams = Column(Integer, default=10)
+    teamSize = Column(Integer, default=5)
+    owner_team_name = Column(String)
+    is_private = Column(Boolean, default=False)
     can_create_team = Column(Boolean, default=True)
+    enter_code = Column(Integer, nullable=True, unique=True)  # Assuming 'code' can be optional and is a string
+    tasks = List[int]  # List of task IDs
 
 
 class Team(Base):
@@ -75,7 +81,7 @@ class Team(Base):
     place = Column(Integer)
     name = Column(String)
     points = Column(Float)
-    competition_id = Column(Integer, ForeignKey('competitions.id'))
+    competition_id = Column(Integer, ForeignKey('competitions.id'), nullable=True)
 
     competition = relationship("Competition", back_populates="teams")
     users = relationship("User", secondary=team_users, back_populates="teams")
@@ -96,9 +102,9 @@ class Task(Base):
 class TaskInfo(Base):
     __tablename__ = 'tasks_info'
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, index=True)
-    type = Column(String)
+    type = Column(String, index=True)
     flag = Column(String)
     difficulty = Column(String)
     description = Column(String)
@@ -106,6 +112,7 @@ class TaskInfo(Base):
     text = Column(String, nullable=True)
     link = Column(String, nullable=True)
     file = Column(String, nullable=True)
+
     comments = relationship("Comment", back_populates="task")
 
 
