@@ -10,6 +10,7 @@ from routers.tasks import router as tasks_router
 from routers.comments import router as comments_router
 from routers.competitions import router as competitions_router
 from routers.files import router as file_router
+from routers.container import router as container_router
 
 models.alchemy_models.Base.metadata.create_all(bind=engine)
 
@@ -57,4 +58,9 @@ app.include_router(
 app.include_router(
     router=file_router,
     prefix="/files"
+)
+
+app.include_router(
+    router=container_router,
+    prefix="/container"
 )

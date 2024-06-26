@@ -5,6 +5,7 @@ from typing import List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
+from sqlalchemy import Boolean
 
 
 class SortOptions(str, Enum):
@@ -156,7 +157,7 @@ class TaskFull(BaseModel):
     image: Optional[str] = ""
     text: Optional[str] = ""
     link: Optional[str] = ""
-    file: Optional[str] = ""
+    file: bool = False
     comment: List[CommentModel]
 
     @classmethod
@@ -170,7 +171,7 @@ class TaskFull(BaseModel):
             image=b64encode(task.image).decode('utf-8') if task.image else None,
             text=task.text,
             link=task.link,
-            file=task.file,
+            file=True if task.file else False,
             comment=[CommentModel.from_orm(comment) for comment in task.comments]
         )
 

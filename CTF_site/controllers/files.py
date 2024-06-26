@@ -1,10 +1,13 @@
 import os
+from base64 import b64encode
 from uuid import UUID
 
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 import aiofiles
-from starlette.responses import JSONResponse, Response, FileResponse
+from fastapi import APIRouter, HTTPException, Depends
+from fastapi.responses import FileResponse
+from starlette.responses import JSONResponse, Response
 
 from models.alchemy_models import Task
 
@@ -20,7 +23,6 @@ async def upload_file(task_id, file, db):
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    # Читаем содержимое файла
     content = await file.read()
 
     # Определяем тип файла и обновляем соответствующее поле
@@ -30,10 +32,13 @@ async def upload_file(task_id, file, db):
     elif file_extension in ["txt"]:
         task.text = content
     elif file_extension in ["exe", "bin"]:
-        file_location = os.path.join(UPLOAD_DIRECTORY, file.filename)
-        async with aiofiles.open(file_location, 'wb') as out_file:
-            await out_file.write(content)
-        task.file = file_location
+        if len(content) > 5 * 1024 * 1024:  # Если файл больше 5Мб
+            file_location = os.path.join(UPLOAD_DIRECTORY, file.filename)
+            async with aiofiles.open(file_location, 'wb') as out_file:
+                await out_file.write(content)
+            task.file = file_location
+        else:
+            task.file = content
     else:
         raise HTTPException(status_code=400, detail="Unsupported file type")
 
@@ -44,8 +49,7 @@ async def upload_file(task_id, file, db):
         db.rollback()
         raise HTTPException(status_code=500, detail="Database error")
 
-    return JSONResponse(content={"info": f"file '{file.filename}' uploaded and task updated"},
-                        status_code=200)
+    return JSONResponse(content={"info": f"file '{file.filename}' uploaded and task updated"}, status_code=200)
 
 
 async def get_file(task_id, db):
@@ -73,7 +77,7 @@ async def get_file(task_id, db):
     return Response(content=file_data, media_type=content_type)
 
 
-def download_file(task_id, db):
+def download_file(task_id,db):
     task = db.query(Task).filter(Task.id == task_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
