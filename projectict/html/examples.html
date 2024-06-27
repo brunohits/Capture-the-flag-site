@@ -1,0 +1,40 @@
+<div class="container align-items-center justify-items-center mt-5 w-75">
+    <div class="border p-4 mb-2">
+        <div class="h2 mb-3">Задачи</div>
+        <label for="name">Название</label>
+        <div class="input-group mb-3">
+            <input class="form-control" id="name">
+            <div class="invalid-feedback"></div>
+        </div>
+        <div class="row mb-2">
+            <div class="col">
+                <label for="sortSelect">Сортировка</label>
+                <select class="form-select" id="sortSelect">
+                    <option value="name_desc">Имя убывание</option>
+                    <option value="name_asc">Имя возрастание</option>
+                    <option value="difficulty_desc">Сложность убывание</option>
+                    <option value="difficulty_asc">Сложность возрастание</option>
+                </select>
+            </div>
+            <div class="col">
+                <label for="filterSelect">Фильтрация</label>
+                <select class="form-select" id="filterSelect">
+                    <option value="hack">Взлом</option>
+                    <option value="cryptogrphy">Криптография</option>
+                </select>
+            </div>
+        </div>
+        <button class="btn btn-primary" id="find">Поиск</button>
+    </div>
+
+    <div class="container w-100" id="examples">
+        <div class="accordion" id="accordion1"></div>
+    </div>
+
+    <nav aria-label="Page navigation example" id="pagination-container" class="d-none">
+        <ul class="pagination justify-content-center">
+        </ul>
+    </nav>
+</div>
+
+<script src="../scripts/examples.js" defer></script>

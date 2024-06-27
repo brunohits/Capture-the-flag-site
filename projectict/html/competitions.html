@@ -1,0 +1,69 @@
+<div class="container align-items-center justify-items-center mt-5 w-75">
+    <div class="border p-4 mb-2">
+        <div class="h2 mb-3">Соревнования</div>
+        <label for="name">Название</label>
+        <div class="input-group mb-3">
+            <input class="form-control" id="name">
+            <div class="invalid-feedback"></div>
+        </div>
+        <div class="row mb-2">
+            <div class="col">
+                <label for="sortSelect">Сортировка</label>
+                <select class="form-select" id="sortSelect">
+                    <option value="name_desc">Имя убывание</option>
+                    <option value="name_asc">Имя возрастание</option>
+                    <option value="start_date_desc">Старт убывание</option>
+                    <option value="start_date_asc">Старт возрастание</option>
+                </select>
+            </div>
+            <div class="col">
+                <label for="filterSelect">Тип</label>
+                <select class="form-select" id="filterSelect">
+                    <option value="small">Малые</option>
+                    <option value="big">Крупные</option>
+                </select>
+            </div>
+        </div>
+        <button class="btn btn-outline-secondary" type="button" id="applyFilters">Поиск</button>
+    </div>
+
+    <div class="container w-100" id="competitionsList">
+        
+    </div>
+
+    <nav aria-label="Page navigation example" id="pagination-container" class="d-none">
+        <ul class="pagination justify-content-center">
+        </ul>
+    </nav>
+</div>
+
+<div class="modal fade" id="joinModal" tabindex="-1" aria-labelledby="joinModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="joinModalLabel">Присоединение к соревнованию</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="teamSelect">Выберите команду</label>
+                    <select class="form-control" id="teamSelect">
+                    </select>
+                </div>
+                <div class="form-group d-none" id="newTeamNameContainer">
+                    <label for="newTeamName">Название новой команды</label>
+                    <input type="text" class="form-control" id="newTeamName">
+                </div>
+                <div class="form-group" id="competitionCodeContainer">
+                    <label for="competitionCode">Введите код соревнования</label>
+                    <input type="text" class="form-control" id="competitionCode">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="joinCompetitionButton">Присоединиться</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../scripts/competitions.js"></script>
