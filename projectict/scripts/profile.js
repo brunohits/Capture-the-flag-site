@@ -1,205 +1,153 @@
-$(document).ready(function() {
+function getAcc(){
+    const token = localStorage.getItem("token");
+    if(!token){
+        window.location.href = '/login';
+        return;
+    } else {
+        $.ajax({
+            url: `http://127.0.0.1:8000/register/users/me/profile?page=1&page_size=10`,
+            method: "GET",
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            contentType: "application/json",
+            success: function(data){
+                console.log(data);
+                showLoggedOutView(data.profile);
+                renderHistory(data.history.competition);
+                renderPagination(data.history.pagination);
+            },
+            error: function(){
+                window.location.href = '/login';
+                return;
+            }
+        });
+    }
+};
+
+function showLoggedOutView(data){
+    document.querySelector("#nick").value = data.username;
+    document.querySelector("#email").value = data.email;
+}
+
+function renderHistory(history) {
+    const historyContainer = document.querySelector('#history');
+    historyContainer.innerHTML = '';
+    history.forEach(item => {
+        const competitionDiv = document.createElement('div');
+        competitionDiv.className = 'border row p-2 align-items-center mb-1';
+        competitionDiv.innerHTML = `
+            <div class="col">${new Date(item.date).toLocaleDateString()}</div>
+            <div class="col">${item.name}</div>
+            <div class="col">${item.type}</div>
+            <div class="col">${item.end_date}</div>
+            <div class="col">${item.points}</div>
+            <div class="col">${item.place}</div>
+            <div class="col btn btn-primary" data-id="${item.id}">Подробнее</div>
+        `;
+        historyContainer.appendChild(competitionDiv);
+    });
+}
+
+function renderPagination(pagination) {
+    var pages = pagination.count / 10;
+    if(pagination.count % 10 > 0) pages = pages + 1;
+    const paginationContainer = document.querySelector('#pagin');
+    paginationContainer.innerHTML = '';
+    for (let i = 1; i <= pages; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.className = 'page-link';
+        pageButton.dataset.page = i;
+        pageButton.textContent = i;
+        pageButton.addEventListener('click', function() {
+            fetchHistoryPage(this.dataset.page);
+        });
+        paginationContainer.appendChild(pageButton);
+    }
+}
+
+function fetchHistoryPage(page) {
     const token = localStorage.getItem("token");
     if (!token) {
         window.location.href = '/login';
         return;
-    }
-
-    const email_pattern = RegExp("[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-zA-Z]{2,4}");
-    const nick_pattern = RegExp(".+");
-
-    function fetchProfileData() {
-        // Закомментируем реальный AJAX-запрос для тестирования
-        /*
+    } else {
         $.ajax({
             method: "GET",
-            url: "https://example.com/api/profile",
+            url: `http://127.0.0.1:8000/register/users/me/history?page=${page}&page_size=10`,
             headers: {
                 "Authorization": `Bearer ${token}`
             },
             success: function(data) {
-                $('#nick').val(data.nick);
-                $('#email').val(data.email);
-                renderHistory(data.history);
-                renderPagination(data.history.pagination);
+                renderHistory(data.competition);
+                renderPagination(data.pagination);
             },
-            error: function(error) {
-                alert('Ошибка получения данных профиля: ' + error.responseText);
+            error: function() {
+                window.location.href = '/login';
+                return;
             }
         });
-        */
+    }
+}
 
-        // Тестовые данные для проверки
-        const testData = {
-            nick: "testuser",
-            email: "testuser@example.com",
-            history: {
-                competition: [
-                    {
-                        date: "2023-01-01",
-                        name: "Соревнование 1",
-                        type: "Тип 1",
-                        duration: "2 часа",
-                        points: "100",
-                        place: "1",
-                        id: "1"
-                    },
-                    {
-                        date: "2023-02-01",
-                        name: "Соревнование 2",
-                        type: "Тип 2",
-                        duration: "3 часа",
-                        points: "80",
-                        place: "2",
-                        id: "2"
-                    }
-                ],
-                pagination: {
-                    count: 1
-                }
-            }
-        };
+document.querySelector('#save').addEventListener('click', function() {
+    const token = localStorage.getItem("token");
 
-        // Отображение тестовых данных
-        $('#nick').val(testData.nick);
-        $('#email').val(testData.email);
-        renderHistory(testData.history);
-        renderPagination(testData.history.pagination);
+    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    const nickPattern = /.+/;
+
+    const nick = document.querySelector('#nick').value;
+    const email = document.querySelector('#email').value;
+
+    let isValid = true;
+
+    if (!nickPattern.test(nick)) {
+        document.querySelector('#nick').classList.add("is-invalid");
+        isValid = false;
+    } else {
+        document.querySelector('#nick').classList.remove("is-invalid");
     }
 
-    function renderHistory(history) {
-        const historyContainer = $('#history');
-        historyContainer.empty();
-        history.competition.forEach(item => {
-            const competitionDiv = $(`
-                <div class="border row p-2 align-items-center mb-1">
-                    <div class="col">${new Date(item.date).toLocaleDateString()}</div>
-                    <div class="col">${item.name}</div>
-                    <div class="col">${item.type}</div>
-                    <div class="col">${item.duration}</div>
-                    <div class="col">${item.points}</div>
-                    <div class="col">${item.place}</div>
-                    <div class="col btn btn-primary" data-id="${item.id}">Подробнее</div>
-                </div>
-            `);
-            historyContainer.append(competitionDiv);
-        });
+    if (!emailPattern.test(email)) {
+        document.querySelector('#email').classList.add("is-invalid");
+        isValid = false;
+    } else {
+        document.querySelector('#email').classList.remove("is-invalid");
     }
 
-    function renderPagination(pagination) {
-        const paginationContainer = $('.pagination');
-        paginationContainer.empty();
-        for (let i = 1; i <= pagination.count; i++) {
-            const pageLink = $(`
-                <button class="page-link" data-page="${i}">${i}</button>
-            `);
-            paginationContainer.append(pageLink);
-        }
+    if (!isValid) return;
 
-        $('.page-link').on('click', function() {
-            const page = $(this).data('page');
-            fetchHistoryPage(page);
-        });
-    }
+    const profileData = { username: nick, email: email};
 
-    function fetchHistoryPage(page) {
-        // Закомментируем реальный AJAX-запрос для тестирования
-        /*
+    if (!token) {
+        window.location.href = '/login';
+        return;
+    } else {
         $.ajax({
-            method: "GET",
-            url: `https://example.com/api/history?page=${page}`,
-            headers: {
-                "Authorization": `Bearer ${token}`
-            },
-            success: function(data) {
-                renderHistory(data.history);
-                renderPagination(data.history.pagination);
-            },
-            error: function(error) {
-                alert('Ошибка получения данных истории: ' + error.responseText);
-            }
-        });
-        */
-        // Тестовые данные для проверки
-        const testHistoryData = {
-            competition: [
-                {
-                    date: "2023-01-01",
-                    name: "Соревнование 1",
-                    type: "Тип 1",
-                    duration: "2 часа",
-                    points: "100",
-                    place: "1",
-                    id: "1"
-                },
-                {
-                    date: "2023-02-01",
-                    name: "Соревнование 2",
-                    type: "Тип 2",
-                    duration: "3 часа",
-                    points: "80",
-                    place: "2",
-                    id: "2"
-                }
-            ],
-            pagination: {
-                count: 1
-            }
-        };
-        renderHistory(testHistoryData);
-        renderPagination(testHistoryData.pagination);
-    }
-
-    $('#save').on('click', function() {
-        const nick = $('#nick').val().trim();
-        const email = $('#email').val().trim();
-
-        let isValid = true;
-
-        if (!nick_pattern.test(nick)) {
-            $('#nick').addClass("is-invalid");
-            isValid = false;
-        } else {
-            $('#nick').removeClass("is-invalid");
-        }
-
-        if (!email_pattern.test(email)) {
-            $('#email').addClass("is-invalid");
-            isValid = false;
-        } else {
-            $('#email').removeClass("is-invalid");
-        }
-
-        if (!isValid) return;
-
-        const profileData = { nick, email };
-
-        // Закомментируем реальный AJAX-запрос для тестирования
-        /*
-        $.ajax({
+            url: `http://127.0.0.1:8000/register/users/me/editProfile`,
             method: "PUT",
-            url: "https://example.com/api/profile",
             headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
+                'Authorization': `Bearer ${token}`
             },
+            contentType: "application/json",
+            dataType: "json",
             data: JSON.stringify(profileData),
-            success: function() {
-                alert('Профиль успешно обновлен');
+            success: function(data) {
+                localStorage.removeItem("token");
+                localStorage.setItem("token", data.access_token);
             },
             error: function(error) {
-                alert('Ошибка обновления профиля: ' + error.responseText);
+                console.log(error.responseText);
             }
         });
-        */
-        // Тестовое сообщение для проверки
-        alert('Профиль успешно обновлен');
-    });
-
-    $('#history').on('click', '.btn-primary', function() {
-        const competitionId = $(this).data('id');
-        window.location.href = `/competition/${competitionId}`;
-    });
-
-    fetchProfileData();
+    }
 });
+
+document.querySelector('#history').addEventListener('click', function(event) {
+    if (event.target.classList.contains('btn-primary')) {
+        const competitionId = event.target.dataset.id;
+        window.location.href = `/oldCompetition?id=${competitionId}`;
+    }
+});
+
+getAcc();

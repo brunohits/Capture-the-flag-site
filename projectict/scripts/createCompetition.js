@@ -16,36 +16,23 @@ $(document).ready(function() {
     $('#searchTasks').on('click', function() {
         const taskName = $('#taskNameSearch').val();
         const taskType = $('#taskTypeSearch').val();
-        const taskDifficulty = $('#taskDifficultySearch').val();
-        fetchTasks(taskName, taskType, taskDifficulty);
+        fetchTasks(taskName, taskType);
     });
 
-    function fetchTasks(name, type, difficulty) {
-        // Реальный AJAX-запрос закомментирован
-        /*
-        const url = `https://mis-api.kreosoft.space/api/examples?name=${name}&type=${type}&difficulty=${difficulty}`;
+    function fetchTasks(name, type) {
         $.ajax({
             method: "GET",
-            url: url,
+            url: `http://127.0.0.1:8000/tasks?filter=${type}&name=${name}`,
             headers: {
                 "Authorization": `Bearer ${token}`
             },
             success: function(data) {
-                renderTaskList(data.examples);
+                renderTaskList(data.tasks);
             },
             error: function(error) {
                 alert('Ошибка поиска задач: ' + error.responseText);
             }
         });
-        */
-
-        // Тестовые данные
-        const testTasks = [
-            { id: 1, name: "Задача 1", type: "type1", difficulty: "easy" },
-            { id: 2, name: "Задача 2", type: "type2", difficulty: "medium" },
-            { id: 3, name: "Задача 3", type: "type3", difficulty: "hard" }
-        ];
-        renderTaskList(testTasks);
     }
 
     function renderTaskList(tasks) {
@@ -54,7 +41,9 @@ $(document).ready(function() {
         tasks.forEach(task => {
             const taskItem = $(`
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    ${task.name} (Сложность: ${task.difficulty}, Тип: ${task.type})
+                
+                    <span class="task-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${task.name}">${task.name}</span>
+                    <span>(Сложность: ${task.difficulty}, Тип: ${task.type})</span>
                     <button class="btn btn-sm btn-primary add-task" data-id="${task.id}" data-name="${task.name}">Добавить</button>
                 </li>
             `);
@@ -72,7 +61,10 @@ $(document).ready(function() {
         const selectedTaskList = $('#selectedTaskList');
         const taskItem = $(`
             <li class="list-group-item d-flex justify-content-between align-items-center">
-                ${taskName}
+                <span class="task-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${taskName}</span>
+                <div class="input-group input-group-sm ml-2" style="width: 100px;">
+                    <input type="number" class="form-control task-cost" placeholder="Стоимость" data-id="${taskId}">
+                </div>
                 <button class="btn btn-sm btn-danger remove-task" data-id="${taskId}">Удалить</button>
             </li>
         `);
@@ -83,40 +75,38 @@ $(document).ready(function() {
         });
     }
 
-    $('#create-competition-form').on('submit', function(e) {
+    $('#submit').on('click', function(e) {
         e.preventDefault();
 
         const selectedTasks = [];
-        $('#selectedTaskList .remove-task').each(function() {
-            selectedTasks.push($(this).data('id'));
+        $('#selectedTaskList .task-cost').each(function() {
+            const taskId = $(this).data('id');
+            const taskCost = $(this).val();
+            selectedTasks.push({ task_id: taskId, points: taskCost });
         });
-
-        const durationHours = parseInt($('#durationHours').val());
-        const durationMinutes = parseInt($('#durationMinutes').val());
-        const totalDuration = durationHours * 60 + durationMinutes;
 
         const competitionData = {
             name: $('#competitionName').val(),
             description: $('#competitionDescription').val(),
-            startDate: $('#startDate').val(),
-            duration: totalDuration,
-            maxTeams: $('#maxTeams').val(),
-            teamSize: $('#teamSize').val(),
-            teamName: $('#teamName').val(),
-            isPrivate: $('#isPrivate').val() === 'true',
-            code: $('#isPrivate').val() === 'true' ? $('#competitionCode').val() : null,
+            start_date: $('#startDate').val(),
+            end_date: $('#endDate').val(),
+            type: "small",
+            max_teams: $('#maxTeams').val(),
+            team_size: $('#teamSize').val(),
+            owner_team_name: $('#teamName').val(),
+            is_private: $('#isPrivate').val() === 'true',
+            enter_code: $('#isPrivate').val() === 'true' ? $('#competitionCode').val() : null,
             tasks: selectedTasks
         };
 
-        // Реальный AJAX-запрос закомментирован
-        /*
         $.ajax({
             method: "POST",
-            url: "https://mis-api.kreosoft.space/api/competitions",
+            url: "http://127.0.0.1:8000/competitions/comp/create",
             headers: {
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json"
             },
+            dataType: "json",
             data: JSON.stringify(competitionData),
             success: function(response) {
                 alert('Соревнование успешно создано!');
@@ -126,10 +116,7 @@ $(document).ready(function() {
                 alert('Ошибка создания соревнования: ' + error.responseText);
             }
         });
-        */
 
-        // Тестовый ответ
-        alert('Соревнование успешно создано!');
-        window.location.href = '/competitions';
+        console.log(competitionData);
     });
 });

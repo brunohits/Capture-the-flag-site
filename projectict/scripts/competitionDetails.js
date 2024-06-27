@@ -1,5 +1,6 @@
 $(document).ready(function() {
     const token = localStorage.getItem("token");
+    
     if (!token) {
         window.location.href = '/login';
         return;
@@ -8,61 +9,38 @@ $(document).ready(function() {
     fetchCompetitionDetails();
 
     function fetchCompetitionDetails() {
-        // Реальный AJAX-запрос закомментирован
-        /*
         $.ajax({
             method: "GET",
-            url: `https://mis-api.kreosoft.space/api/competitions/${competitionId}`,
+            url: `http://127.0.0.1:8000/competitions/active_competition`,
             headers: {
                 "Authorization": `Bearer ${token}`
             },
             success: function(data) {
+                console.log(data);
                 renderCompetitionDetails(data);
             },
             error: function(error) {
                 alert('Ошибка получения информации о соревновании: ' + error.responseText);
-                window.location.href = '/competitions';
             }
         });
-        */
+    }
 
-        // Тестовые данные
-        const testCompetitionData = {
-            name: "Тестовое соревнование",
-            description: "Описание тестового соревнования",
-            startDate: new Date(),
-            duration: 24,
-            team: {
-                name: "Тестовая команда",
-                score: 100
-            },
-            teams: [
-                { name: "Команда 1", score: 150 },
-                { name: "Команда 2", score: 100 },
-                { name: "Команда 3", score: 50 }
-            ],
-            tasks: [
-                {
-                    id: 1,
-                    name: "Задача 1",
-                    type: "Тип 1",
-                    difficulty: "Легкая",
-                    description: "Описание задачи 1",
-                    media: [
-                        { url: "http://example.com/file1.txt", name: "file1.txt" }
-                    ]
-                },
-                {
-                    id: 2,
-                    name: "Задача 2",
-                    type: "Тип 2",
-                    difficulty: "Средняя",
-                    description: "Описание задачи 2",
-                    media: []
-                }
-            ]
-        };
-        renderCompetitionDetails(testCompetitionData);
+    function renderMedia(example) {
+        if (example.image) {
+            return `<img src="data:image/jpeg;base64,${example.image}" class="img-fluid">`;
+        } else if (example.link) {
+            return `<a href="${example.link}" target="_blank">Перейти по ссылке</a>`;
+        } else if (example.text) {
+            return `<p>${example.text}</p>`;
+        }
+        return '';
+    }
+
+    function renderFileButton(example) {
+        if (example.file) {
+            return `<button class="btn btn-primary" onclick="downloadFile('${example.id}')">Скачать файл</button>`;
+        }
+        return '';
     }
 
     function renderCompetitionDetails(competition) {
@@ -83,39 +61,27 @@ $(document).ready(function() {
 
         let tasksList = '';
         competition.tasks.forEach((task, index) => {
-            const uniqueId = `task-${index}-${Date.now()}`;
-
-            let mediaFiles = '';
-            if (task.media && task.media.length > 0) {
-                mediaFiles += `<div class="h5 mt-3">Медиафайлы:</div>`;
-                task.media.forEach(media => {
-                    mediaFiles += `
-                        <div>
-                            <a href="${media.url}" target="_blank">${media.name}</a>
-                        </div>
-                    `;
-                });
-            }
-
             tasksList += `
                 <div class="accordion-item">
-                    <h2 class="accordion-header" id="heading${uniqueId}">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${uniqueId}" aria-expanded="true" aria-controls="collapse${uniqueId}">
+                    <h2 class="accordion-header" id="heading${index}">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${index}" aria-expanded="true" aria-controls="collapse${index}">
                             <div class="col text-center">${task.name}</div>
                             <div class="col text-center">${task.type}</div>
-                            <div class="col text-center">${task.difficulty}</div>
+                            <div class="col text-center">${task.points}</div>
                         </button>
                     </h2>
-                    <div id="collapse${uniqueId}" class="accordion-collapse collapse" aria-labelledby="heading${uniqueId}" data-bs-parent="#accordion1">
+                    <div id="collapse${index}" class="accordion-collapse collapse" aria-labelledby="heading${index}" data-bs-parent="#accordion1">
                         <div class="accordion-body">
                             <div class="h5">Описание</div>
-                            <p>${task.description}</p>
-                            ${mediaFiles}
+                            <div style="white-space: normal; word-wrap: break-word;">${task.description}</div>
+                            ${renderMedia(task)}
+                            ${renderFileButton(task)}
                             <div class="input-group mb-3">
-                                <input type="text" class="form-control" id="flag${uniqueId}" placeholder="Введите флаг">
-                                <button class="btn btn-primary" onclick="checkFlag('${task.id}', '${uniqueId}', '${competition.team.id}')">Проверить</button>
+                                <input type="text" class="form-control" id="flag${index}" placeholder="Введите флаг">
+                                <button class="btn btn-primary" onclick="checkFlag('${task.id}', '${index}')">Проверить</button>
                             </div>
-                            <div id="flag-result${uniqueId}"></div>
+                            <div id="flag-result${index}"></div>
+                            <div id="comment-result${index}"></div>
                         </div>
                     </div>
                 </div>
@@ -126,7 +92,7 @@ $(document).ready(function() {
             <h3>${competition.name}</h3>
             <p>${competition.description}</p>
             <p>Дата начала: ${new Date(competition.startDate).toLocaleString()}</p>
-            <p>Длительность: ${competition.duration} часов</p>
+            <p>Дата окончания: ${new Date(competition.endDate).toLocaleString()} часов</p>
             <p>Название вашей команды: ${teamName}</p>
             <p>Баллы вашей команды: ${teamScore}</p>
 
@@ -151,40 +117,57 @@ $(document).ready(function() {
         `;
         competitionDetails.html(html);
     }
-});
 
-function checkFlag(taskId, uniqueId, teamId) {
-    const flagInput = $(`#flag${uniqueId}`).val();
-    
-    // Реальный AJAX-запрос закомментирован
-    /*
-    $.ajax({
-        method: "POST",
-        url: `https://mis-api.kreosoft.space/api/tasks/${taskId}/submit`,
-        headers: {
-            "Authorization": `Bearer ${localStorage.getItem("token")}`
-        },
-        data: {
-            flag: flagInput,
-            teamId: teamId
-        },
-        success: function(response) {
-            $(`#flag-result${uniqueId}`).html(`<div class="alert alert-success">${response.message}</div>`);
-        },
-        error: function(error) {
-            $(`#flag-result${uniqueId}`).html(`<div class="alert alert-danger">${error.responseJSON.message}</div>`);
-        }
-    });
-    */
-
-    // Тестовые данные для эмуляции ответа сервера
-    const testFlagResponse = {
-        message: "Флаг принят"
+    window.checkFlag = function(taskId, index) {
+        const flagInput = $(`#flag${index}`).val();
+        
+        $.ajax({
+            method: "GET",
+            url: `http://127.0.0.1:8000/tasks/check_flag_in_competition?task_id=${taskId}&user_flag=${flagInput}`,
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+            success: function(response) {
+                $(`#flag-result${index}`).html(`<div class="alert alert-success">${response.message}</div>`);
+            },
+            error: function(error) {
+                $(`#flag-result${index}`).html(`<div class="alert alert-danger">${error.responseJSON.message}</div>`);
+            }
+        });
     };
 
-    if (flagInput === "testflag") {
-        $(`#flag-result${uniqueId}`).html(`<div class="alert alert-success">${testFlagResponse.message}</div>`);
-    } else {
-        $(`#flag-result${uniqueId}`).html(`<div class="alert alert-danger">Неверный флаг</div>`);
-    }
-}
+    window.downloadFile = function(taskId) {
+        $.ajax({
+            method: "GET",
+            url: `http://127.0.0.1:8000/files/downloadfile/?task_id=${taskId}`,
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(response, status, xhr) {
+                var contentDisposition = xhr.getResponseHeader('Content-Disposition');
+                if (contentDisposition) {
+                    var filename = contentDisposition.split('filename=')[1];
+                    filename = filename.replace(/"/g, '');
+                    var url = window.URL.createObjectURL(new Blob([response]));
+                    var a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                } else {
+                    alert('Не удалось получить имя файла для скачивания.');
+                }
+            },
+            error: function(error) {
+                alert('Произошла ошибка при скачивании файла.');
+            }
+        });
+    };
+
+});

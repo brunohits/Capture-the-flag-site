@@ -14,12 +14,8 @@
             <input type="datetime-local" class="form-control" id="startDate" required>
         </div>
         <div class="mb-3">
-            <label for="durationHours" class="form-label">Длительность (Часы)</label>
-            <input type="number" class="form-control" id="durationHours" required>
-        </div>
-        <div class="mb-3">
-            <label for="durationMinutes" class="form-label">Длительность (Минуты)</label>
-            <input type="number" class="form-control" id="durationMinutes" required>
+            <label for="startDate" class="form-label">Дата окончания</label>
+            <input type="datetime-local" class="form-control" id="endDate" required>
         </div>
         <div class="mb-3">
             <label for="maxTeams" class="form-label">Максимальное количество команд</label>
@@ -74,7 +70,7 @@
             <label class="form-label">Выбранные задачи</label>
             <ul class="list-group" id="selectedTaskList"></ul>
         </div>
-        <button type="submit" class="btn btn-primary">Создать соревнование</button>
+        <button type="submit" id="submit" class="btn btn-primary">Создать соревнование</button>
     </form>
 </div>
 <script src="scripts/createCompetition.js"></script>

@@ -1,7 +1,6 @@
 document.querySelector("head").innerHTML = `<meta charset="UTF-8">`;
 
 let route = window.location.pathname;
-console.log(route);
 switch (route) {
     case "/login":
         $.get("html/login.html", (data)=>{
@@ -27,12 +26,6 @@ switch (route) {
             document.querySelector("head").innerHTML+=`<title>examples</title>`;
         });
         break;
-    case "/raiting":
-        $.get("html/raiting.html", (data)=>{
-            updatepage(data);
-            document.querySelector("head").innerHTML+=`<title>raiting</title>`;
-        });
-        break;
     case "/createCompetition":
         $.get("html/createCompetition.html", (data)=>{
             updatepage(data);
@@ -52,7 +45,7 @@ switch (route) {
         });
         break;
     default:
-        if (route.startsWith("/oldCompetition/")) {
+        if (route.startsWith("/oldCompetition")) {
             $.get("html/oldCompetition.html", (data) => {
                 updatepage(data);
                 document.querySelector("head").innerHTML += `<title>oldCompetition</title>`;
