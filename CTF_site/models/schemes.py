@@ -150,6 +150,7 @@ class CommentModel(BaseModel):
     class Config:
         from_attributes = True
 
+
 class TaskFull(BaseModel):
     id: UUID
     name: str

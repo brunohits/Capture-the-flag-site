@@ -7,11 +7,16 @@ $(document).ready(function() {
 
     function fetchExamples(page = 1, sort = 'name_desc', filter = '') {
         const name = document.querySelector('#name').value;
+        var newUrl = `http://127.0.0.1:8000/tasks?page=${page}&sort=${sort}&name=${name}`;
+        if(filter != ""){
+            const encodedFilter = encodeURIComponent(filter);
+            newUrl += `&filter_type=${encodedFilter}`;
+        }
         console.log(name);
-        console.log(`http://127.0.0.1:8000/tasks?page=${page}&sort=${sort}&filter=${filter}&name=${name}`);
+        console.log(newUrl);
         $.ajax({
             method: "GET",
-            url: `http://127.0.0.1:8000/tasks?page=${page}&sort=${sort}&filter=${filter}&name=${name}`,
+            url: newUrl,
             headers: {
                 "Authorization": `Bearer ${token}`
             },

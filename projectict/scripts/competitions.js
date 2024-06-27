@@ -148,11 +148,11 @@ $(document).ready(function() {
         }else{
             newUrl = `http://127.0.0.1:8000/competitions/teams/${competitionId}/join_or_create?team_id=${teamId}`;
         }
-
-        if(testData.isClosed){
+        const selectedCompetition = testData.competitions.find(comp => comp.id === competitionId);
+        if(selectedCompetition.is_private){
             newUrl += `&enter_code=${code}`;
         }
-
+        console.log(code)
         console.log(newUrl);
 
         if(teamId == "none"){
